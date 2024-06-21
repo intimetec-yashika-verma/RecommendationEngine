@@ -8,4 +8,7 @@ class MenuDAO
  void updateMenuItem(std::string name,std::string updatedName,std::string price,std::string availablity,std::string mealType);
  void removeMenuItem(std::string name);
  std::vector<std::string> fetchMenuItems();
+ std::vector<std::string> getItemIdsforMealType(std::string mealType);
+ std::string getNameFromId(std::string itemId);
+ std::string getIdFromName(std::string name);
 };

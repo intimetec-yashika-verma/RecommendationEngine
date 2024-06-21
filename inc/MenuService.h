@@ -7,6 +7,9 @@ class MenuService
       bool updateItem(std::string name,std::string updatedName,std::string price,std::string availablity,std::string mealType);
       bool removeItem(std::string name);
       std::vector<std::string> getMenuItem();
+      std::vector<std::string> getMenuItemIdsForMealType(std::string mealType);
+      std::string getMenuItemNameFromId(std::string itemId);
+      std::string getMenuItemIdFromName(std::string itemName);
 
 
 };

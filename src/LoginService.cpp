@@ -2,6 +2,8 @@
 #include "../inc/Server.h"
 #include "../inc/AuthenticationService.h"
 #include "../inc/AdminController.h"
+#include "../inc/ChefController.h"
+#include  "../inc/EmployeeController.h"
 
 LoginService::LoginService()
 {
@@ -47,8 +49,20 @@ void LoginService::executeRoleBasedFunction(int role,int sessionId)
     switch (role)
     {
     case 1:
+    {
         AdminController adminController = AdminController(sessionId);
         adminController.loginAdmin();
         break;
     }
+    case 2:
+    {
+        ChefController chefController = ChefController(sessionId);
+        chefController.loginChef();
+    }
+    case 3:
+    {
+        EmployeeController employeeController = EmployeeController();
+        
+    }
+}
 }

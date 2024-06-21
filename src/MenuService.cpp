@@ -40,3 +40,23 @@ std::vector<std::string> MenuService::getMenuItem()
     std::cout << std::endl;
     return menuItems;
 }
+ std::vector<std::string> MenuService::getMenuItemIdsForMealType(std::string mealType)
+ {
+    MenuDAO dao = MenuDAO();
+    std::vector<std::string> menuIds = dao.getItemIdsforMealType(mealType);
+    return menuIds;
+
+ }
+ std::string MenuService::getMenuItemNameFromId(std::string itemId)
+ {
+   MenuDAO dao = MenuDAO();
+   std::string itemName = dao.getNameFromId(itemId);
+   return itemName;
+ }
+
+ std::string MenuService::getMenuItemIdFromName(std::string itemName)
+ {
+    MenuDAO dao = MenuDAO();
+    std::string id=dao.getIdFromName(itemName);
+    return id;
+ }

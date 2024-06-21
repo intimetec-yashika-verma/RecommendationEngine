@@ -12,6 +12,13 @@ public:
      void showDeleteItemPrompt();
     void showAddItemPrompt();
    std::vector<std::string> getDataToUpdate();
+   void showChefMenu();
+   void showRecommendedItems(std::string mealType);
+   void showRecommendationMenu();
+   void showEmployeeMenu();
+   
+
+  
 
 private:
     Client *client;

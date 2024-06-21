@@ -43,6 +43,7 @@ int Session::validateRole(std::string role)
     }
     else if (role == "chef")
     {
+        std::cout<<"I am Chef";
         enumValue = 2;
     }
     else if (role == "employee")

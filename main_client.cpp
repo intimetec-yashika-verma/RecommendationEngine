@@ -4,7 +4,7 @@
 
 int main() {
     std::string serverIp = "127.0.0.1"; // Replace with your server's IP address
-    int serverPort = 3456; // Replace with your server's port number
+    int serverPort = 2345; // Replace with your server's port number
 
     Client *client=new Client(serverIp, serverPort);
 
