@@ -22,4 +22,5 @@ public:
 
 private:
     Client *client;
+    std::string clientRole; 
 };

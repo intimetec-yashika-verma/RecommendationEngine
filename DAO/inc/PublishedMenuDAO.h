@@ -1,6 +1,14 @@
+#pragma once
 #include <iostream>
 #include <vector>
-class PublishedMenuDAO{
-  public:
-    void addItems(std::vector<std::string> itemList);
+#include "DatabaseConnection.h"
+class PublishedMenuDAO
+{
+public:
+PublishedMenuDAO();
+  void addItems(std::string itemList);
+
+private:
+  DatabaseConnection *dbConnection;
+  MYSQL *connection;
 };

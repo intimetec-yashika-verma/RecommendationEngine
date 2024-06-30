@@ -1,17 +1,26 @@
-#include "RecommendationEngine.h"
 #pragma once
-class ChefController
+#include "RecommendationService.h"
+#include "SelectionService.h"
+#include "NotificationService.h"
+#include "IUserController.h"
+#include "Operation.h"
+#include "MenuService.h"
+
+class ChefController : public IUserController
 {
   public:
-  int sessionId;
-    RecommendationEngine recommendationEngine;
-    ChefController(int sessionId);
+    ChefController(RecommendationService *recommendationService,SelectionService *selectionService,NotificationService *notificationService,MenuService *menuService);
     void rollOutNextDayMenu(std::vector<std::string>);
     std::vector<std::string> getRecommededMenu(std::string mealType);
-    void loginChef();
-    void performChefAction();
-    void showRecommendations(std::string mealType);
-    void getSelectedMenu();
-    void publishTodaysMenu();
+    std::vector<std::string> handleRequest(std::pair<Operation, std::vector<std::string>> request);
+    std::vector<std::string> showRecommendations(std::vector<std::string> mealType);
+    std::vector<std::string> getSelectedMenu(std::vector<std::string> selectedItems);
+    std::vector<std::string> getVotedItemsList();
+    std::vector<std::string> publishTodaysMenu(std::vector<std::string> finalizedMenu);
     std::vector<std::string> selectedMenu;
+    private:
+    RecommendationService *recommendationService;
+    SelectionService *selectionService;
+    NotificationService *notificationService;
+    MenuService *menuService;
 };

@@ -1,7 +1,6 @@
 #include "Server.h"
-#include "LoginService.h"
 #include <thread>
-#include "ClientSession.h"
+#include "ClientHandler.h"
 #include "StringSerializer.h"
 #include "DatabaseConnection.h"
 
@@ -37,7 +36,6 @@ Server::Server(int port) : port(port)
     }
 
     std::cout << "Server listening on port " << port << "..." << std::endl;
-    bool connectDatabase();
 }
 
 Server::~Server()
@@ -62,12 +60,12 @@ void Server::startListening()
 
         // Create a thread to handle this client
         
-        std::thread clientThread(&Server::handleClient, this, clientSocket);
+        std::thread clientThread(&ClientHandler::handle, ClientHandler(clientSocket));
         clientThreads.push_back(std::move(clientThread));
     }
 }
 
-std::vector<std::string> Server::receiveMessage(int clientSocket)
+std::vector<std::string> Server::receiveMessage()
 {
 
     char buffer[1024];
@@ -88,14 +86,10 @@ std::vector<std::string> Server::receiveMessage(int clientSocket)
     std::string str(buffer);
     StringSerializer stringSerializer = StringSerializer();
     std::vector<std::string> receivedVector = stringSerializer.deserialize(str);
-
-    // Output the std::string
-    // std::cout << str << std::endl;
-
     return receivedVector;
 }
 
-void Server::sendMessage(std::vector<std::string> message, int clientSocket)
+bool Server::sendMessage(std::vector<std::string> message)
 {
     StringSerializer stringSerializer = StringSerializer();
     std::string messageToSent = stringSerializer.serialize(message);
@@ -111,14 +105,3 @@ void Server::sendMessage(std::vector<std::string> message, int clientSocket)
     }
 }
 
-void Server::handleClient(int clientSocket)
-{
-    ClientSession currentSession = ClientSession(clientSocket,this);
-    int userRole = currentSession.startSession();
-}
-
-bool Server::connectDatabase()
-{
-   DatabaseConnection *dbConnection = DatabaseConnection::getInstance();
-    this->connection=dbConnection;
-}

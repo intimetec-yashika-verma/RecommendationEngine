@@ -1,9 +1,17 @@
 #pragma once
-#include<iostream>
+#include <iostream>
 #include <vector>
+#include "DatabaseConnection.h"
 
-class NotificationDAO{
-    public:
-        void addNewNotification(std::string genratedId,std::string notificationType,std::string notificationMessage);
-        std::string getLastUserId();
+class NotificationDAO
+{
+public:
+NotificationDAO();
+    void addNewNotification(std::string genratedId, std::string notificationType, std::string notificationMessage);
+    std::string getLastUserId();
+    std::vector<std::string> getUserNotifcations(std::string userId);
+
+private:
+    DatabaseConnection *dbConnection;
+    MYSQL *connection;
 };

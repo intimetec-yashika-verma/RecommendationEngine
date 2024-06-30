@@ -1,51 +1,51 @@
-#include "RecommendationEngine.h"
+#include "RecommendationService.h"
 #include "FeedbackService.h"
 #include "Utilities.h"
 #include "MenuService.h"
 #include <queue>
 
-RecommendationEngine::RecommendationEngine() : positiveWords_(Utilities::readWordsFromFile("PositiveWords.txt")),
+RecommendationService::RecommendationService() : positiveWords_(Utilities::readWordsFromFile("PositiveWords.txt")),
                                                negativeWords_(Utilities::readWordsFromFile("NegativeWords.txt")),
                                                negationWords_(Utilities::readWordsFromFile("NegationWords.txt"))
 {
     feedbackService_ = new FeedbackService();
 }
 
-std::vector<std::string> RecommendationEngine::recommendTopFoodItems(std::string mealType)
+std::vector<std::string> RecommendationService::recommendTopFoodItems(std::string mealType)
 {
-    std::priority_queue<std::pair<double, std::string>> foodItemScores;
-    std::unordered_set<std::string> seenItems;
-    MenuService menuService = MenuService();
-    std::vector<std::string> ids = menuService.getMenuItemIdsForMealType(mealType);
-    //std::cout << "ids" << std::endl;
-    for (const auto &id : ids)
-    {
-        if (seenItems.find(id) == seenItems.end())
-        {
-            double score = evaluateFoodItem(id);
-            foodItemScores.push({score, id});
-           // std::cout << "ids" << std::endl;
-            seenItems.insert(id);
-        }
-    }
-    //std::cout << "ids" << std::endl;
-    std::vector<std::string> topFoodItemIds;
-    while (topFoodItemIds.size() < 4 && !foodItemScores.empty())
-    {
-        topFoodItemIds.push_back(foodItemScores.top().second);
-        foodItemScores.pop();
-    }
-    //std::cout << "ids" << std::endl;
-    std::vector<std::string> topFoodItemName;
-    for (std::string itemId : topFoodItemIds)
-    {
-        std::string itemName= menuService.getMenuItemNameFromId(itemId);
-        topFoodItemName.push_back(itemName);
-    }
-    return topFoodItemName;
+    // std::priority_queue<std::pair<double, std::string>> foodItemScores;
+    // std::unordered_set<std::string> seenItems;
+    // MenuService menuService = MenuService();
+    // std::vector<std::string> ids = menuService.getMenuItemIdsForMealType(mealType);
+    // //std::cout << "ids" << std::endl;
+    // for (const auto &id : ids)
+    // {
+    //     if (seenItems.find(id) == seenItems.end())
+    //     {
+    //         double score = evaluateFoodItem(id);
+    //         foodItemScores.push({score, id});
+    //        // std::cout << "ids" << std::endl;
+    //         seenItems.insert(id);
+    //     }
+    // }
+    // //std::cout << "ids" << std::endl;
+    // std::vector<std::string> topFoodItemIds;
+    // while (topFoodItemIds.size() < 4 && !foodItemScores.empty())
+    // {
+    //     topFoodItemIds.push_back(foodItemScores.top().second);
+    //     foodItemScores.pop();
+    // }
+    // //std::cout << "ids" << std::endl;
+    // std::vector<std::string> topFoodItemName;
+    // for (std::string itemId : topFoodItemIds)
+    // {
+    //     std::string itemName= menuService.getMenuItemNameFromId(itemId);
+    //     topFoodItemName.push_back(itemName);
+    // }
+    // return topFoodItemName;
 }
 
-double RecommendationEngine::evaluateFoodItem(const std::string &ItemId)
+double RecommendationService::evaluateFoodItem(const std::string &ItemId)
 {
     double totalScore = 0.0;
 
@@ -62,7 +62,7 @@ double RecommendationEngine::evaluateFoodItem(const std::string &ItemId)
     return totalScore;
 }
 
-double RecommendationEngine::analyzeSentiment(const std::string &comment)
+double RecommendationService::analyzeSentiment(const std::string &comment)
 {
     std::string lowerComment = Utilities::toLower(comment);
     std::vector<std::string> words = Utilities::splitWords(lowerComment);

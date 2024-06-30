@@ -1,18 +1,14 @@
 #pragma once
 #include <iostream>
 #include <vector>
-
-enum NotificationType
-{
-    SelectMenu=0,
-    NewItemAdded=1,
-    ItemUpdated=2
-};
+#include "NotificationDAO.h"
 
 class NotificationService
 {
     public:
+    NotificationService(NotificationDAO *notificationDAO);
     void sendNewNotification(int type,std::string message); 
     std::vector<std::string> getAllNotifications(std::string userId);
-    
+    private:
+    NotificationDAO *notificationDAO;
 };

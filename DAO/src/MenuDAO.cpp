@@ -1,44 +1,48 @@
 #include "MenuDAO.h"
 #include "DatabaseConnection.h"
+#include "MenuItem.h"
 
+MenuDAO::MenuDAO(): dbConnection{DatabaseConnection::getInstance()}
+{
+    connection=dbConnection->getConnection();
+}
 std::string MenuDAO::getLastUserId()
 {
     std::string lastUserId = "user000";
-    DatabaseConnection *dbConnection = DatabaseConnection::getInstance();
-    MYSQL *connection = dbConnection->getConnection();
-    mysql_query(connection, "SELECT userId FROM MenuItems ORDER BY userId DESC LIMIT 1");
+    mysql_query(connection, "SELECT id FROM MenuItems ORDER BY id DESC LIMIT 1");
     MYSQL_RES *result = mysql_store_result(connection);
     MYSQL_ROW row = mysql_fetch_row(result);
+    std::cout<<row[0];
     return row[0];
 }
-void MenuDAO::addNewItem(std::string itemId, std::string name, std::string price, std::string availablity, std::string mealType)
+void MenuDAO::addNewItem(std::string itemId, std::string name,std::string availablity, std::string price,  std::string mealType)
 {
-    DatabaseConnection *dbConnection = DatabaseConnection::getInstance();
-    MYSQL *connection = dbConnection->getConnection();
     std::string query = "INSERT INTO MenuItems (id, name,availability,price,mealType) VALUES ('" + itemId + "', '" + name + "','" + availablity + "','" + price + "','" + mealType + "')";
-    mysql_query(connection, query.c_str());
+    if (mysql_query(connection, query.c_str())) {
+        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
+    } else {
+        std::cout << "Query executed successfully." << std::endl;
+    }
 }
-void MenuDAO::updateMenuItem(std::string name, std::string updatedName, std::string price, std::string availablity, std::string mealType)
+void MenuDAO::updateMenuItem(std::string name, std::string propertyName,std::string updatedValue)
 {
-    DatabaseConnection *dbConnection = DatabaseConnection::getInstance();
-    MYSQL *connection = dbConnection->getConnection();
-    std::string query = "UPDATE MenuItems SET name = '" + updatedName;
-    mysql_query(connection, query.c_str());
+    std::string query = "UPDATE MenuItems SET "+propertyName+" = '" + updatedValue +"' WHERE name = '"+updatedValue+"'";
+    if (mysql_query(connection, query.c_str())) {
+        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
+    } else {
+        std::cout << "Query executed successfully." << std::endl;
+    }
 }
 
 void MenuDAO::removeMenuItem(std::string name)
 {
-    DatabaseConnection *dbConnection = DatabaseConnection::getInstance();
-    MYSQL *connection = dbConnection->getConnection();
     std::string query = "DELETE FROM MenuItems WHERE name = '" + name + "'";
     mysql_query(connection, query.c_str());
 }
 
-std::vector<std::string> MenuDAO::fetchMenuItems()
+std::vector<MenuItem> MenuDAO::fetchMenuItems()
 {
-    std::vector<std::string> menuItems = {"name", "availiblity", "price", "mealType"};
-    DatabaseConnection *dbConnection = DatabaseConnection::getInstance();
-    MYSQL *connection = dbConnection->getConnection();
+    std::vector<MenuItem> menuItems;
     std::string query = "SELECT * FROM MenuItems";
     if (mysql_query(connection, query.c_str()))
     {
@@ -56,16 +60,13 @@ std::vector<std::string> MenuDAO::fetchMenuItems()
     MYSQL_ROW row;
     while ((row = mysql_fetch_row(result)))
     {
-        for (int i = 1; i <= 4; i++)
-        {
-            std::string data = row[i];
-            menuItems.push_back(data);
-        }
+       MenuItem item;
+       item.itemName = row[1];
+       item.availability=row[2];
+       item.price=row[3];
+       item.mealType=row[4];
+       menuItems.push_back(item);
     }
-    // for (std::string num : menuItems) {
-    //     std::cout << num << " ";
-    // }
-    // std::cout << std::endl;
     mysql_free_result(result);
     return menuItems;
 }
@@ -94,8 +95,6 @@ std::vector<std::string> MenuDAO::getItemIdsforMealType(std::string mealType)
 
 std::string MenuDAO::getNameFromId(std::string itemId)
 {
-    DatabaseConnection *dbConnection = DatabaseConnection::getInstance();
-    MYSQL *connection = dbConnection->getConnection();
     std::string query = "SELECT name FROM MenuItems WHERE id ='" + itemId + "'";
     if (mysql_query(connection, query.c_str()))
     {
@@ -118,8 +117,6 @@ std::string MenuDAO::getNameFromId(std::string itemId)
 
 std::string MenuDAO::getIdFromName(std::string name)
 {
-    DatabaseConnection *dbConnection = DatabaseConnection::getInstance();
-    MYSQL *connection = dbConnection->getConnection();
     std::string query = "SELECT id FROM MenuItems WHERE name ='" + name + "'";
     if (mysql_query(connection, query.c_str()))
     {

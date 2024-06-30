@@ -1,5 +1,6 @@
 #include "ClientController.h"
 #include "Client.h"
+#include "Operation.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -12,7 +13,7 @@ ClientController::ClientController(Client *client)
 }
 void ClientController::LoginPrompt()
 {
-    std::vector<std::string> loginCredentials;
+    std::vector<std::string> loginCredentials = {"1"};
     std::string response;
     std::cout << "enter email id: " << std::endl;
     std::cin >> response;
@@ -21,6 +22,8 @@ void ClientController::LoginPrompt()
     std::cin >> response;
     loginCredentials.push_back(response);
     client->sendMessage(loginCredentials);
+    std::vector<std::string> clientRole = client->receiveMessage();
+    showMenuPrompt(clientRole[0]);
 }
 
 void ClientController::showMenuPrompt(std::string userRole)
@@ -61,12 +64,10 @@ int ClientController::showAdminMenu()
 
         if (adminChoice == "1")
         {
-
             showAddItemPrompt();
         }
         else if (adminChoice == "2")
         {
-
             showUpdateMenuPrompt();
         }
         else if (adminChoice == "3")
@@ -79,7 +80,6 @@ int ClientController::showAdminMenu()
         }
         else if (adminChoice == "5")
         {
-            client->sendMessage(userInput);
             flag = false;
         }
         else
@@ -92,45 +92,47 @@ int ClientController::showAdminMenu()
 void ClientController::showAddItemPrompt()
 {
     std::vector<std::string> userResponse;
-    userResponse.push_back("1");
+    userResponse.push_back("2");
     std::string userInput;
     std::cout << "Enter Item name:- " << std::endl;
     std::cin >> userInput;
     userResponse.push_back(userInput);
-    std::cout << "Enter Item price:- " << std::endl;
+    std::cout << "Enter Item availablity:- " << std::endl;
     std::cin >> userInput;
     userResponse.push_back(userInput);
-    std::cout << "Enter Item availablity:- " << std::endl;
+    std::cout << "Enter Item price:- " << std::endl;
     std::cin >> userInput;
     userResponse.push_back(userInput);
     std::cout << "Enter meal type(breakfast/lunch/dinner):- " << std::endl;
     std::cin >> userInput;
     userResponse.push_back(userInput);
     client->sendMessage(userResponse);
+    std::vector<std::string> serverResponse = client->receiveMessage();
 }
 
 void ClientController::showUpdateMenuPrompt()
 {
-    std::vector<std::string> userResponse(6, "");
-    userResponse[0] = "2";
+    std::vector<std::string> userResponse = {"4"};
     std::string userInput;
     std::cout << "Name the item you like to update" << std::endl;
     std::cin >> userInput;
-    userResponse[1] = userInput;
+    userResponse.push_back(userInput);
 
     std::vector<std::string> updatedData = getDataToUpdate();
     userResponse.insert(userResponse.end(), updatedData.begin(), updatedData.end());
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < userResponse.size(); i++)
     {
+        std::cout<<"here"<<std::endl;
         std::cout << userResponse[i] << ",";
     }
     std::cout << std::endl;
     client->sendMessage(userResponse);
+    std::vector<std::string> serverResponse = client->receiveMessage();
 }
 
 std::vector<std::string> ClientController::getDataToUpdate()
 {
-    std::vector<std::string> userResponse(4, "");
+    std::vector<std::string> userResponse = {"", "", "", ""};
     bool flag = true;
     std::string userInput;
     while (flag)
@@ -184,10 +186,11 @@ void ClientController::showDeleteItemPrompt()
     std::cin >> userChoice;
     userResponse.push_back(userChoice);
     client->sendMessage(userResponse);
+    std::vector<std::string> serverResponse = client->receiveMessage();
 }
 void ClientController::showMenu()
 {
-    std::vector<std::string> userResponse{"4"};
+    std::vector<std::string> userResponse{"5","view"};
     client->sendMessage(userResponse);
     std::vector<std::string> menu = client->receiveMessage();
     int itemCount = 4;
@@ -202,6 +205,7 @@ void ClientController::showMenu()
         }
         std::cout << std::endl;
     }
+    
 }
 
 void ClientController::showChefMenu()
@@ -214,10 +218,9 @@ void ClientController::showChefMenu()
     {
         std::cout << "Select the operation which you like to perform\n"
                      "1. Get Recommendation\n"
-                     "2. Roll out menu\n"
-                     "3. Get list of voted Items\n"
-                     "4. Update next day menu\n"
-                     "5. Exit\n"
+                     "2. Get list of voted Items\n"
+                     "3. Update next day menu\n"
+                     "4. Exit\n"
                      "Enter your choice :- "
                   << std::endl;
         std::string chefChoice;
@@ -253,7 +256,7 @@ void ClientController::showChefMenu()
 
 void ClientController::showRecommendedItems(std::string mealType)
 {
-    std::vector<std::string> userResponse = {"1", mealType};
+    std::vector<std::string> userResponse = {"6", mealType};
     client->sendMessage(userResponse);
     std::vector<std::string> menu = client->receiveMessage();
     for (std::string i : menu)
@@ -262,14 +265,16 @@ void ClientController::showRecommendedItems(std::string mealType)
     }
     std::cout << std::endl;
     std::cout << "Select items for tomorrow's " << mealType << ":-" << std::endl;
-    std::vector<std::string> selectedItems;
-    for (int i = 0; i < 2; i++)
+    std::vector<std::string> selectedItems={"7"};
+    for (int i = 0; i <= 2; i++)
     {
         std::string name;
         std::getline(std::cin >> std::ws, name);
         selectedItems.push_back(name);
     }
     client->sendMessage(selectedItems);
+    std::vector<std::string> response = client->receiveMessage();
+    std::cout<<response[0]<<std::endl;
 }
 
 void ClientController::showRecommendationMenu()
@@ -308,6 +313,8 @@ void ClientController::showRecommendationMenu()
 
 void ClientController::publishTodayMenu()
 {
+    std::vector<std::string> userResponse={"8","list"};
+    client->sendMessage(userResponse);
     std::vector<std::string> votedItems = client->receiveMessage();
     for (int i = 0; i < votedItems.size(); i++)
     {
@@ -321,8 +328,17 @@ void ClientController::publishTodayMenu()
         }
     }
     std::cout << "Select Items to cook tomorrow" << std::endl;
-    std::vector<std::string> todaysMenu;
+    std::vector<std::string> todaysMenu = {"9"};
+    for(int i=0;i<2;i++)
+    {
+      std::string userInput;
+      std::cin>> userInput;
+      todaysMenu.push_back(userInput);
+    }
     client->sendMessage(todaysMenu);
+    std::vector<std::string> response = client->receiveMessage();
+    std::cout<<response[0]<<std::endl;
+
 }
 
 void ClientController::showEmployeeMenu()
@@ -366,48 +382,45 @@ void ClientController::showEmployeeMenu()
 
 void ClientController::viewNotification()
 {
-    std::vector<std::string> userResponse={"1"};
+    std::vector<std::string> userResponse = {"10"};
     client->sendMessage(userResponse);
     std::vector<std::string> notificationData = client->receiveMessage();
     std::unordered_map<int, std::pair<std::string, std::string>> notifications;
-    int i =0,count =1;
-    while(i<notificationData.size())
+    int i = 0, count = 1;
+    while (i < notificationData.size())
     {
-       notifications[count]= std::make_pair(notificationData[i],notificationData[i+1]);
-       i=i+2;
+        notifications[count] = std::make_pair(notificationData[i], notificationData[i + 1]);
+        i = i + 2;
     }
-    for (const auto& element : notifications) {
-        std::cout << element.first <<" ";
-        if(element.second.first == "0")
-        {
-           std::cout<< "Select Menu"<<std::endl;
-        }
-        else if(element.second.first == "1")
-        {
-            std::cout<< "New Item Added"<<std::endl;
-        }
-        else if(element.second.first == "2")
-        {
-            std::cout<<"Item Updated"<<std::endl;
-        }
-    }
-    int userChoice ;
-    std::cin>>userChoice;
-    if(notifications[userChoice].first=="1")
+    for (const auto &element : notifications)
     {
-       void showMenuToBeVoted();
+        std::cout << element.first << " ";
+        if (element.second.first == "0")
+        {
+            std::cout << "Select Menu" << std::endl;
+        }
+        else if (element.second.first == "1")
+        {
+            std::cout << "New Item Added" << std::endl;
+        }
+        else if (element.second.first == "2")
+        {
+            std::cout << "Item Updated" << std::endl;
+        }
+    }
+    int userChoice;
+    std::cin >> userChoice;
+    if (notifications[userChoice].first == "1")
+    {
+        void showMenuToBeVoted();
     }
     else
     {
-
     }
-
-  
 }
 
 void ClientController::showMenuToBeVoted()
 {
-    std::vector<std::string> userResponse={"id"};
-    client->sendMessage(userResponse)
-    
+    std::vector<std::string> userResponse = {"id"};
+    client->sendMessage(userResponse);
 }

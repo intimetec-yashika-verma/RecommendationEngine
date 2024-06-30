@@ -3,41 +3,54 @@
 #include <sstream>
 #include <iomanip>
 
-bool MenuService::addItem(std::string name,std::string price,std::string availablity,std::string mealType)
+MenuService::MenuService(MenuDAO *menuDAO):menuDAO(menuDAO)
 {
-    MenuDAO dao=MenuDAO();
-    std::string lastId=dao.getLastUserId();
-   // std::cout<<"lastId"<<lastId<<std::endl;
+
+}
+bool MenuService::addItem(std::string name,std::string availablity,std::string price,std::string mealType)
+{
+    std::string lastId=menuDAO->getLastUserId();
+    std::cout<<"lastId"<<lastId<<std::endl;
     int num = std::stoi(lastId.substr(4)) + 1;
 
     std::ostringstream oss;
     oss << "ITEM" << std::setw(3) << std::setfill('0') << num;
     std::string newId =oss.str();
-    //std::cout<<"newId"<<newId<<std::endl;
-    dao.addNewItem(newId,name,price,availablity,mealType);
+    std::cout<<"newId"<<newId<<std::endl;
+    menuDAO->addNewItem(newId,name,availablity,price,mealType);
     return true;
 } 
 
-bool MenuService::updateItem(std::string name,std::string updatedName,std::string price,std::string availablity,std::string mealType)
+bool MenuService::updateItem(std::string name,std::string updatedName,std::string price,std::string availability,std::string mealType)
 {
-    MenuDAO dao = MenuDAO();
-
+   if(updatedName!="")
+   {
+       menuDAO->updateMenuItem(name,"name",updatedName);
+   }
+   if(price!="")
+   {
+       menuDAO->updateMenuItem(name,"price",price);
+   }
+   if(availability!="")
+   {
+       menuDAO->updateMenuItem(name,"availability",availability);
+   }
+   if(mealType!="")
+   {
+    menuDAO->updateMenuItem(name,"mealType",mealType);
+   }
+   return true;
 }
 
 bool MenuService::removeItem(std::string name)
 {
-     MenuDAO dao = MenuDAO();
-     dao.removeMenuItem(name);
+    menuDAO->removeMenuItem(name);
+    return true;
 }
 
-std::vector<std::string> MenuService::getMenuItem()
+std::vector<MenuItem> MenuService::getMenuItem()
 {
-    MenuDAO dao=MenuDAO();
-    std::vector<std::string> menuItems = dao.fetchMenuItems();
-    // for (std::string num : menuItems) {
-    //     std::cout << num << " ";
-    // }
-    // std::cout << std::endl;
+    std::vector<MenuItem> menuItems = menuDAO->fetchMenuItems();
     return menuItems;
 }
  std::vector<std::string> MenuService::getMenuItemIdsForMealType(std::string mealType)

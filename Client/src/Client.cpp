@@ -1,5 +1,5 @@
-#include "../inc/Client.h"
-#include "../inc/StringSerializer.h"
+#include "Client.h"
+#include "StringSerializer.h"
 #include <vector>
 
 Client::Client(const std::string &serverIp, int serverPort)
@@ -49,8 +49,8 @@ bool Client::sendMessage(std::vector<std::string> message)
 
     StringSerializer stringSerializer = StringSerializer();
     std::string messageToSent = stringSerializer.serialize(message);
-    std::cout<<messageToSent<<std::endl;
-    std::cout<<messageToSent.c_str()<<std::endl;
+    std::cout<<"messageToSent:-"<<messageToSent<<std::endl;
+    // std::cout<<messageToSent.c_str()<<std::endl;
     ssize_t bytesSent = send(clientSocket, messageToSent.c_str(), messageToSent.size(), 0);
     //std::cout<<bytesSent<<std::endl;
     if (bytesSent == -1)

@@ -1,5 +1,5 @@
-#include "inc/Client.h"
-#include "inc/ClientController.h"
+#include "Client.h"
+#include "ClientController.h"
 #include <iostream>
 
 int main() {

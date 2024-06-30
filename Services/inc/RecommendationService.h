@@ -3,7 +3,7 @@
 #include "FeedbackService.h"
 #include <unordered_set>
 #pragma once
-class RecommendationEngine
+class RecommendationService
 {
 public:
     struct MenuItem
@@ -16,7 +16,7 @@ public:
         std::unordered_set<std::string> positiveWords_;
         std::unordered_set<std::string> negativeWords_;
         std::unordered_set<std::string> negationWords_;
-        RecommendationEngine();
+        RecommendationService();
         std::vector<std::string> recommendTopFoodItems(std::string mealType);
         double evaluateFoodItem(const std::string &foodItem);
         double analyzeSentiment(const std::string &comment);

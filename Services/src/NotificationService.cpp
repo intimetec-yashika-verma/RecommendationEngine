@@ -5,22 +5,25 @@
 #include <sstream>
 #include <iomanip>
 
+NotificationService::NotificationService(NotificationDAO *notificationDAO):notificationDAO(notificationDAO)
+{
+
+}
 void NotificationService::sendNewNotification(int type,std::string message)
 {
-     NotificationDAO dao = NotificationDAO();
-     std::string lastId = dao.getLastUserId();
+
+     std::string lastId = notificationDAO->getLastUserId();
      int num = std::stoi(lastId.substr(6)) + 1;
 
      std::ostringstream oss;
      oss << "NOTIFY" << std::setw(3) << std::setfill('0') << num;
      std::string newId = oss.str();
-
-     dao.addNewNotification(newId,std::to_string(type),message);
+     std::cout<<newId<<std::endl;
+     notificationDAO->addNewNotification(newId,std::to_string(type),message);
 }
 
 std::vector<std::string> NotificationService::getAllNotifications(std::string userId)
 {
-    NotificationDAO notification = NotificationDAO();
-    std::vector<std::string> data = {"1","abc","2","def"};
-    return data;
+    return notificationDAO->getUserNotifcations(userId);
+
 }

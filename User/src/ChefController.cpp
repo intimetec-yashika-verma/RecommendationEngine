@@ -1,84 +1,96 @@
 #include "ChefController.h"
-#include "RecommendationEngine.h"
+#include "RecommendationService.h"
 #include "NotificationService.h"
 #include "Server.h"
 #include "SelectionService.h"
+#include "Operation.h"
 
+ChefController::ChefController(RecommendationService *recommendationService, SelectionService *selectionService, NotificationService *notificationService, MenuService *menuService) : recommendationService(recommendationService), selectionService(selectionService), notificationService(notificationService), menuService(menuService)
+{
+}
 std::vector<std::string> ChefController::getRecommededMenu(std::string mealType)
 {
-    RecommendationEngine recommendationEngine = RecommendationEngine();
-    std::vector<std::string> topFoodItems = recommendationEngine.recommendTopFoodItems(mealType);
+    // RecommendationService recommendationService = RecommendationService();
+    // std::vector<std::string> topFoodItems = recommendationService.recommendTopFoodItems(mealType);
+    std::vector<std::string> topFoodItems = {"Poha", "Sandwich", "Pancakes", "Omelette"};
     return topFoodItems;
 }
-ChefController::ChefController(int sessionId)
-{
-    this->sessionId = sessionId;
-}
 
-void ChefController::loginChef()
+std::vector<std::string> ChefController::handleRequest(std::pair<Operation, std::vector<std::string>> request)
 {
-    std::vector<std::string> user;
-    user.push_back("2");
-    Server::sendMessage(user, sessionId);
-
-    performChefAction();
-}
-
-void ChefController::performChefAction()
-{
-    bool flag = true;
-    while (flag)
+    std::vector<std::string> response;
+    switch (request.first)
     {
-        std::vector<std::string> chefChoice = Server::receiveMessage(sessionId);
-        if (chefChoice[0] == "1")
-        {
-            showRecommendations(chefChoice[1]);
-            // getSelectedMenu();
-        }
-        else if (chefChoice[0] == "2")
-        {
-            publishTodaysMenu();
-            // updateMenuItem(adminChoice);
-        }
-        else if (chefChoice[0] == "3")
-        {
-            // std::cout<<"deleteItem"<<std::endl;
-            // deleteItemFromMenu(adminChoice);
-        }
-        else if (chefChoice[0] == "4")
-        {
-            //    viewMenuItems();
-        }
+    case GetRecommandationFromEngine:
+    {
+        std::cout << "GetRecommandationFromEngine" << std::endl;
+        response = showRecommendations(request.second);
+        break;
+    }
+    case SelectMenuForNextDay:
+    {
+        std::cout << "SelectMenuForNextDay" << std::endl;
+        response = getSelectedMenu(request.second);
+        break;
+    }
+    case GetVoteCountList:
+    {
+        response = getVotedItemsList();
+        break;
+    }
+    case PublishMenuForToday:
+    {
+        response = publishTodaysMenu(request.second);
+        break;
+    }
+        return response;
     }
 }
 
-void ChefController::showRecommendations(std::string mealType)
+std::vector<std::string> ChefController::showRecommendations(std::vector<std::string> mealType)
 {
-    std::vector<std::string> menu = getRecommededMenu(mealType);
-    Server::sendMessage(menu, sessionId);
-    getSelectedMenu();
+    std::vector<std::string> menu = getRecommededMenu(mealType[1]);
+    for (int i = 0; i < menu.size(); i++)
+    {
+        std::cout << menu[i] << " ";
+    }
+    std::cout << std::endl;
+    return menu;
 }
 
-void ChefController::getSelectedMenu()
+std::vector<std::string> ChefController::getSelectedMenu(std::vector<std::string> selectedItems)
 {
-    std::vector<std::string> chefChoice = Server::receiveMessage(sessionId);
-    SelectionService selectionService = SelectionService();
-    selectionService.addSelectedItems(chefChoice);
-    rollOutNextDayMenu(chefChoice);
-}
-
-void ChefController::rollOutNextDayMenu(std::vector<std::string> chefChoice)
-{
-    NotificationService notificationService = NotificationService();
+    std::vector<std::string> ItemsIdList;
+    std::cout << selectedItems[0] << " " << selectedItems[1] << std::endl;
+    for (int i = 1; i < selectedItems.size(); i++)
+    {
+        std::cout << selectedItems[i] << " " << std::endl;
+        ItemsIdList.push_back(menuService->getMenuItemIdFromName(selectedItems[i]));
+    }
+    selectionService->addSelectedItems(ItemsIdList);
+    std::cout << "Selection list filled" << std::endl;
     std::string notificationMessage = "Please vote for the item you would like to have";
-    notificationService.sendNewNotification(0,"Select for tomorrow's menu");
+    notificationService->sendNewNotification(3, "Select menu");
+    std::string success = "got the selected menu";
+    std::cout << success << std::endl;
+    std::vector<std::string> response = {success};
+    return response;
 }
 
-void ChefController::publishTodaysMenu()
+std::vector<std::string> ChefController::publishTodaysMenu(std::vector<std::string> finalizedmenu)
 {
-    SelectionService selectionService = SelectionService();
-    std::vector<std::string> votedList = selectionService.getVotedItemsList();
-    Server::sendMessage(votedList, sessionId);
-    std::vector<std::string> chefChoice = Server::receiveMessage(sessionId);
-    
+    std::vector<std::string> itemsNameList;
+    for (int i = 1; i < finalizedmenu.size(); i++)
+    {
+        std::cout << finalizedmenu[i] << std::endl;
+        itemsNameList.push_back(menuService->getMenuItemIdFromName(finalizedmenu[i]));
+    }
+    selectionService->addPublishedMenu(itemsNameList);
+    return itemsNameList;
+}
+
+std::vector<std::string> ChefController::getVotedItemsList()
+{
+    std::vector<std::string> itemsList = selectionService->getVotedItemsList();
+    return itemsList;
 }

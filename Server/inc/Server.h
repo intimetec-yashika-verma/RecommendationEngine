@@ -8,6 +8,7 @@
 #include <cstring>
 #include <vector>
 #include <thread>
+#include "DatabaseConnection.h"
 
 class Server
 {
@@ -16,8 +17,8 @@ public:
     ~Server();
 
     void startListening();
-     std::vector<std::string> receiveMessage(int clientSocket);
-    void sendMessage(std::vector<std::string> message, int clientSocket);
+     std::vector<std::string> receiveMessage();
+    bool sendMessage(std::vector<std::string> message);
      DatabaseConnection *connection;
 
 private:
@@ -28,6 +29,4 @@ private:
     socklen_t clientAddrLen;
     int port;
     std::vector<std::thread> clientThreads;
-    void handleClient(int clientSocket);
-    bool connectDatabase();
 };
