@@ -7,6 +7,7 @@ class PublishedMenuDAO
 public:
 PublishedMenuDAO();
   void addItems(std::string itemList);
+  std::vector<std::string> getItems();
 
 private:
   DatabaseConnection *dbConnection;

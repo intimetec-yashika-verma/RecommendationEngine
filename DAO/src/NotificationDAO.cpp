@@ -44,7 +44,9 @@ std::vector<std::string> NotificationDAO::getUserNotifcations(std::string userId
     {
         notifications.push_back(row[1]);
          notifications.push_back(row[2]);
+         std::cout<<row[1]<<" "<<row[2]<<std::endl;
     }
+    std::cout<<notifications.size()<<std::endl;
     mysql_free_result(result);
     return notifications;
 }

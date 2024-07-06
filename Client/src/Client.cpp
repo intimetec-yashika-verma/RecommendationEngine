@@ -43,7 +43,18 @@ bool Client::connectToServer()
 
     return true;
 }
-
+bool Client::sendMessage(std::string message)
+{
+    // std::cout<<messageToSent.c_str()<<std::endl;
+    ssize_t bytesSent = send(clientSocket, message.c_str(), message.size(), 0);
+    //std::cout<<bytesSent<<std::endl;
+    if (bytesSent == -1)
+    {
+        std::cerr << "Send failed." << std::endl;
+        return false;
+    }
+    return true;
+}
 bool Client::sendMessage(std::vector<std::string> message)
 {
 

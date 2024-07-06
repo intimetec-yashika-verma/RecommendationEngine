@@ -24,6 +24,7 @@ void NotificationService::sendNewNotification(int type,std::string message)
 
 std::vector<std::string> NotificationService::getAllNotifications(std::string userId)
 {
-    return notificationDAO->getUserNotifcations(userId);
+    std::cout<<userId<<std::endl;
+    return notificationDAO->getUserNotifcations("USER003");
 
 }

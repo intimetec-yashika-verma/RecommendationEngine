@@ -19,6 +19,8 @@ public:
     void publishTodayMenu();
     void viewNotification();
     void showMenuToBeVoted();
+    void voteForTomorrowMenu();
+    void giveFeedback();
 
 private:
     Client *client;

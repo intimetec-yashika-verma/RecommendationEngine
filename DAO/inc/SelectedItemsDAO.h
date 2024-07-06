@@ -6,10 +6,12 @@
 class SelectedItemsDAO
 {
 public:
-SelectedItemsDAO();
+    SelectedItemsDAO();
     void addSlectedItems(std::string itemId);
+    std::vector<std::string> getSelectedItemsAndVotes();
     std::vector<std::string> getSelectedItems();
-
+    void saveUserVotes(std::string itemName);
+    
 private:
     DatabaseConnection *dbConnection;
     MYSQL *connection;

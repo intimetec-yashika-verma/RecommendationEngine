@@ -14,4 +14,5 @@ public:
    static std::vector<std::string> splitWords(const std::string &str);
 
    static std::unordered_set<std::string> readWordsFromFile(const std::string &filename);
+   static std::vector<std::string> splitFeedback(const std::string &s);
 };

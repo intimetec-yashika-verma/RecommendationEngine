@@ -8,7 +8,7 @@ RecommendationService::RecommendationService() : positiveWords_(Utilities::readW
                                                negativeWords_(Utilities::readWordsFromFile("NegativeWords.txt")),
                                                negationWords_(Utilities::readWordsFromFile("NegationWords.txt"))
 {
-    feedbackService_ = new FeedbackService();
+    // feedbackService_ = new FeedbackService();
 }
 
 std::vector<std::string> RecommendationService::recommendTopFoodItems(std::string mealType)
@@ -54,7 +54,7 @@ double RecommendationService::evaluateFoodItem(const std::string &ItemId)
 
     // for (const auto &comment : feedback.comments)
     //     averageSentimentScore += analyzeSentiment(comment);
-    averageSentimentScore += analyzeSentiment(feedback->comments);
+    averageSentimentScore += analyzeSentiment(feedback->comment);
     // averageSentimentScore /= feedbackcomments.size();
 
     totalScore = (averageSentimentScore + feedback->rating) / 2.0;

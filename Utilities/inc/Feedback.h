@@ -3,5 +3,5 @@
 #pragma once
 struct Feedback {
         int rating;
-        std::string comments;
+        std::string comment;
 };

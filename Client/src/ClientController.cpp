@@ -1,11 +1,13 @@
 #include "ClientController.h"
 #include "Client.h"
 #include "Operation.h"
+#include "Feedback.h"
 #include <vector>
 #include <iostream>
 #include <string>
 #include <limits>
 #include <unordered_map>
+#include "Serializer.h"
 
 ClientController::ClientController(Client *client)
 {
@@ -122,7 +124,7 @@ void ClientController::showUpdateMenuPrompt()
     userResponse.insert(userResponse.end(), updatedData.begin(), updatedData.end());
     for (int i = 0; i < userResponse.size(); i++)
     {
-        std::cout<<"here"<<std::endl;
+        std::cout << "here" << std::endl;
         std::cout << userResponse[i] << ",";
     }
     std::cout << std::endl;
@@ -190,7 +192,7 @@ void ClientController::showDeleteItemPrompt()
 }
 void ClientController::showMenu()
 {
-    std::vector<std::string> userResponse{"5","view"};
+    std::vector<std::string> userResponse{"5", "view"};
     client->sendMessage(userResponse);
     std::vector<std::string> menu = client->receiveMessage();
     int itemCount = 4;
@@ -205,7 +207,6 @@ void ClientController::showMenu()
         }
         std::cout << std::endl;
     }
-    
 }
 
 void ClientController::showChefMenu()
@@ -265,7 +266,7 @@ void ClientController::showRecommendedItems(std::string mealType)
     }
     std::cout << std::endl;
     std::cout << "Select items for tomorrow's " << mealType << ":-" << std::endl;
-    std::vector<std::string> selectedItems={"7"};
+    std::vector<std::string> selectedItems = {"7"};
     for (int i = 0; i <= 2; i++)
     {
         std::string name;
@@ -274,7 +275,7 @@ void ClientController::showRecommendedItems(std::string mealType)
     }
     client->sendMessage(selectedItems);
     std::vector<std::string> response = client->receiveMessage();
-    std::cout<<response[0]<<std::endl;
+    std::cout << response[0] << std::endl;
 }
 
 void ClientController::showRecommendationMenu()
@@ -313,7 +314,7 @@ void ClientController::showRecommendationMenu()
 
 void ClientController::publishTodayMenu()
 {
-    std::vector<std::string> userResponse={"8","list"};
+    std::vector<std::string> userResponse = {"8", "list"};
     client->sendMessage(userResponse);
     std::vector<std::string> votedItems = client->receiveMessage();
     for (int i = 0; i < votedItems.size(); i++)
@@ -329,16 +330,15 @@ void ClientController::publishTodayMenu()
     }
     std::cout << "Select Items to cook tomorrow" << std::endl;
     std::vector<std::string> todaysMenu = {"9"};
-    for(int i=0;i<2;i++)
+    for (int i = 0; i < 2; i++)
     {
-      std::string userInput;
-      std::cin>> userInput;
-      todaysMenu.push_back(userInput);
+        std::string userInput;
+        std::cin >> userInput;
+        todaysMenu.push_back(userInput);
     }
     client->sendMessage(todaysMenu);
     std::vector<std::string> response = client->receiveMessage();
-    std::cout<<response[0]<<std::endl;
-
+    std::cout << response[0] << std::endl;
 }
 
 void ClientController::showEmployeeMenu()
@@ -351,15 +351,15 @@ void ClientController::showEmployeeMenu()
     {
         std::cout << "Select the operation which you like to perform\n"
                      "1. View Notifications\n"
-                     "2. Give Feeback\n"
-                     "3. back\n"
+                     "2. Vote For Tommorrow's Menu\n"
+                     "3. Give Feeback\n"
+                     "4. Share review On Discarded item\n"
                      "Enter your choice :- "
                   << std::endl;
         std::string employeeChoice;
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::getline(std::cin >> std::ws, employeeChoice);
-        std::vector<std::string> userInput = {employeeChoice};
 
         if (employeeChoice == "1")
         {
@@ -367,11 +367,11 @@ void ClientController::showEmployeeMenu()
         }
         else if (employeeChoice == "2")
         {
-            // rollOutMenu();
+            voteForTomorrowMenu();
         }
         else if (employeeChoice == "3")
         {
-            showMenu();
+            giveFeedback();
         }
         else
         {
@@ -382,45 +382,57 @@ void ClientController::showEmployeeMenu()
 
 void ClientController::viewNotification()
 {
-    std::vector<std::string> userResponse = {"10"};
+    std::vector<std::string> userResponse = {"10", "notification"};
     client->sendMessage(userResponse);
     std::vector<std::string> notificationData = client->receiveMessage();
-    std::unordered_map<int, std::pair<std::string, std::string>> notifications;
-    int i = 0, count = 1;
-    while (i < notificationData.size())
+    for (int i = 0; i < notificationData.size(); i++)
     {
-        notifications[count] = std::make_pair(notificationData[i], notificationData[i + 1]);
-        i = i + 2;
-    }
-    for (const auto &element : notifications)
-    {
-        std::cout << element.first << " ";
-        if (element.second.first == "0")
-        {
-            std::cout << "Select Menu" << std::endl;
-        }
-        else if (element.second.first == "1")
-        {
-            std::cout << "New Item Added" << std::endl;
-        }
-        else if (element.second.first == "2")
-        {
-            std::cout << "Item Updated" << std::endl;
-        }
-    }
-    int userChoice;
-    std::cin >> userChoice;
-    if (notifications[userChoice].first == "1")
-    {
-        void showMenuToBeVoted();
-    }
-    else
-    {
+        std::cout << notificationData[i] << std::endl;
     }
 }
 
-void ClientController::showMenuToBeVoted()
+void ClientController::voteForTomorrowMenu()
 {
-    std::vector<std::string> userResponse = {"id"};
+    std::vector<std::string> userResponse = {"12", "sendItemList"};
     client->sendMessage(userResponse);
+    std::vector<std::string> menuItemList = client->receiveMessage();
+    std::cout << "Select item for tomorrow's Menu:-" << std::endl;
+    for (int i = 0; i < menuItemList.size(); i++)
+    {
+        std::cout << menuItemList[i] << std::endl;
+    }
+    std::vector<std::string> votedItems{"13"};
+    std::string breakfastItem, lunchItem, dinnerItem;
+    std::getline(std::cin >> std::ws, breakfastItem);
+    std::getline(std::cin >> std::ws, lunchItem);
+    std::getline(std::cin >> std::ws, dinnerItem);
+    votedItems.push_back(breakfastItem);
+    votedItems.push_back(lunchItem);
+    votedItems.push_back(dinnerItem);
+    client->sendMessage(votedItems);
+    menuItemList = client->receiveMessage();
+}
+void ClientController::giveFeedback()
+{
+    std::vector<std::string> userResponse = {"11","feedback"};
+    client->sendMessage(userResponse);
+    std::vector<std::string> menuItemList = client->receiveMessage();
+    std::unordered_map<std::string,Feedback> feedbacks;
+    for(int i= 0;i<menuItemList.size();i++)
+    {
+        Feedback feedbackData;
+        std::cout<<"Enter rating Data:- "<<std::endl;
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cin>>feedbackData.rating;
+        std::cout<<"Enter the comment for dish:- "<<std::endl;
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::getline(std::cin >> std::ws, feedbackData.comment);
+        feedbacks[menuItemList[i]]=feedbackData;
+    }
+    std::string input = "14,"+Serializer::serializeFeedbacks(feedbacks);
+    std::cout<<input<<std::endl;
+    client->sendMessage(input);
+    menuItemList = client->receiveMessage();
 }

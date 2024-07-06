@@ -16,7 +16,7 @@
 #include "PublishedMenuDAO.h"
 #include "NotificationDAO.h"
 #include "EmployeeController.h"
-
+#include "FeedbackDAO.h"
 RequestProcessor::RequestProcessor()
 {
 }
@@ -69,12 +69,15 @@ std::vector<std::string> RequestProcessor::processRequest(std::vector<std::strin
         }
         case Role::employee:
         { 
+            std::cout<<"Employee logged In"<<std::endl;
             PublishedMenuDAO *publishedMenuDAO = new PublishedMenuDAO();
             SelectedItemsDAO *selectedItemsDAO = new SelectedItemsDAO();
+            FeedbackDAO *feedbackDAO = new FeedbackDAO();
             NotificationDAO  *notificationDAO = new NotificationDAO();
             SelectionService *selectionService = new SelectionService(selectedItemsDAO,publishedMenuDAO);
             NotificationService *notificationService=new NotificationService(notificationDAO);
-            userController = new EmployeeController(notificationService,userId);
+            FeedbackService *feedbackService = new FeedbackService(feedbackDAO);
+            userController = new EmployeeController(notificationService,selectionService,feedbackService,userId);
         }
         }
     }

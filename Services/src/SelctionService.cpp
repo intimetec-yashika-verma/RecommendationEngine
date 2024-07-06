@@ -17,7 +17,7 @@ void SelectionService::addSelectedItems(std::vector<std::string> itemsList)
 
 std::vector<std::string> SelectionService::getVotedItemsList()
 {
-    std::vector<std::string> itemsList = selectedItemsDAO->getSelectedItems();
+    std::vector<std::string> itemsList = selectedItemsDAO->getSelectedItemsAndVotes();
     return itemsList;
 }
 
@@ -27,4 +27,23 @@ void SelectionService::addPublishedMenu(std::vector<std::string> itemsList)
     {
        publishedMenuDAO->addItems(itemsList[i]);
     }
+}
+
+std::vector<std::string> SelectionService::getListOfItemsToVote()
+{
+   return selectedItemsDAO->getSelectedItems();
+}
+
+void SelectionService::saveVotes(std::vector<std::string> votedItems)
+{
+    for(int i =0;i<votedItems.size();i++)
+    {
+        std::cout<<votedItems[i]<<std::endl;
+        selectedItemsDAO->saveUserVotes(votedItems[i]);
+    }
+}
+
+std::vector<std::string> SelectionService::getPublishedMenu()
+{
+    return publishedMenuDAO->getItems();
 }

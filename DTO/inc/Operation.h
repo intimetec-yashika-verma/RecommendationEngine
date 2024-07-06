@@ -13,5 +13,6 @@ enum Operation : int
    ViewNotification = 10,
    ProvideFeedback = 11,
    VoteItemFromTomorrowMenu = 12,
-
+   SaveVotingResponse = 13,
+   saveFeedback=14
 };
