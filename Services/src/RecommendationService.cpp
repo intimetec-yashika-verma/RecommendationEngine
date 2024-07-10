@@ -2,47 +2,46 @@
 #include "FeedbackService.h"
 #include "Utilities.h"
 #include "MenuService.h"
+#include "MenuDAO.h"
 #include <queue>
+#include <sstream>
+#include <string>
 
-RecommendationService::RecommendationService() : positiveWords_(Utilities::readWordsFromFile("PositiveWords.txt")),
+RecommendationService::RecommendationService(MenuDAO *menuDao,FeedbackDAO  *feedbackDao) : positiveWords_(Utilities::readWordsFromFile("PositiveWords.txt")),
                                                negativeWords_(Utilities::readWordsFromFile("NegativeWords.txt")),
-                                               negationWords_(Utilities::readWordsFromFile("NegationWords.txt"))
+                                               negationWords_(Utilities::readWordsFromFile("NegationWords.txt")),menuDao(menuDao),feedbackDao(feedbackDao)
 {
-    // feedbackService_ = new FeedbackService();
+
 }
 
 std::vector<std::string> RecommendationService::recommendTopFoodItems(std::string mealType)
 {
-    // std::priority_queue<std::pair<double, std::string>> foodItemScores;
-    // std::unordered_set<std::string> seenItems;
-    // MenuService menuService = MenuService();
-    // std::vector<std::string> ids = menuService.getMenuItemIdsForMealType(mealType);
-    // //std::cout << "ids" << std::endl;
-    // for (const auto &id : ids)
-    // {
-    //     if (seenItems.find(id) == seenItems.end())
-    //     {
-    //         double score = evaluateFoodItem(id);
-    //         foodItemScores.push({score, id});
-    //        // std::cout << "ids" << std::endl;
-    //         seenItems.insert(id);
-    //     }
-    // }
-    // //std::cout << "ids" << std::endl;
-    // std::vector<std::string> topFoodItemIds;
-    // while (topFoodItemIds.size() < 4 && !foodItemScores.empty())
-    // {
-    //     topFoodItemIds.push_back(foodItemScores.top().second);
-    //     foodItemScores.pop();
-    // }
-    // //std::cout << "ids" << std::endl;
-    // std::vector<std::string> topFoodItemName;
-    // for (std::string itemId : topFoodItemIds)
-    // {
-    //     std::string itemName= menuService.getMenuItemNameFromId(itemId);
-    //     topFoodItemName.push_back(itemName);
-    // }
-    // return topFoodItemName;
+    std::vector<std::string> menuItems = menuDao->getMenuItemsForMealType(mealType);
+        std::unordered_map<std::string, double> itemScores;
+
+        for (const auto& itemId : menuItems) {
+            std::vector<std::pair<std::string, std::string>> feedbacks = feedbackDao->getItemFeedback(itemId);
+            double totalScore = 0.0;
+
+            for (const auto& feedback : feedbacks) {
+                double score =analyzeSentiment(feedback.second);
+                totalScore += score;
+            }
+
+            itemScores[itemId] = totalScore;
+        }
+
+        std::vector<std::pair<std::string, double>> sortedItems(itemScores.begin(), itemScores.end());
+        std::sort(sortedItems.begin(), sortedItems.end(), [](const auto& a, const auto& b) {
+            return b.second < a.second;
+        });
+
+        std::vector<std::string> recommendedItems;
+        for (const auto& item : sortedItems) {
+            recommendedItems.push_back(menuDao->getNameFromId(item.first));
+        }
+
+        return recommendedItems;
 }
 
 double RecommendationService::evaluateFoodItem(const std::string &ItemId)
@@ -62,40 +61,111 @@ double RecommendationService::evaluateFoodItem(const std::string &ItemId)
     return totalScore;
 }
 
-double RecommendationService::analyzeSentiment(const std::string &comment)
-{
-    std::string lowerComment = Utilities::toLower(comment);
-    std::vector<std::string> words = Utilities::splitWords(lowerComment);
+ double RecommendationService::analyzeSentiment(const std::string& text) {
+        std::istringstream stream(text);
+        std::string word;
+        int score = 0;
+        bool negate = false;
 
-    int sentimentScore = 0;
-    for (size_t i = 0; i < words.size(); ++i)
-    {
-        std::string word = words[i];
-        bool isNegated = (i > 0 && negationWords_.find(words[i - 1]) != negationWords_.end());
+        while (stream >> word) {
+            std::transform(word.begin(), word.end(), word.begin(), ::tolower);
+            word.erase(std::remove_if(word.begin(), word.end(), ::ispunct), word.end());
 
-        if (isNegated && i > 1 && negationWords_.find(words[i - 2]) != negationWords_.end())
-        {
-            isNegated = false;
+            if (negationWords_.find(word) != negationWords_.end()) {
+                negate = true;
+                continue;
+            }
+
+            if (positiveWords_.find(word) != positiveWords_.end()) {
+                score += negate ? -1 : 1;
+            } else if (negativeWords_.find(word) != negativeWords_.end()) {
+                score += negate ? 1 : -1;
+            }
+
+            negate = false;
+        }
+        return score;
+    }
+
+std::vector<std::string> RecommendationService::generateDiscardList() {
+    std::unordered_map<std::string,std::vector<Feedback>> menuItems = feedbackDao->fetchMenuItemsWithFeedback();
+    std::vector<std::string> discardList;
+    for (const auto &item : menuItems) {
+        double sumRatings = 0;
+        int countRatings = 0;
+        bool hasNegativeComment = false;
+
+        for (const Feedback &feedback :item.second) {
+            sumRatings += feedback.rating;
+            countRatings++;
+            if (containsNegativeWords(feedback.comment)) {
+                hasNegativeComment = true;
+            }
         }
 
-        if (positiveWords_.find(word) != positiveWords_.end())
-        {
-            sentimentScore += isNegated ? -1 : 1;
-        }
-        else if (negativeWords_.find(word) != negativeWords_.end())
-        {
-            sentimentScore += isNegated ? 1 : -1;
+        double averageRating = countRatings ? sumRatings / countRatings : 0;
+
+        if (averageRating < 2 || hasNegativeComment) {
+            discardList.push_back(item.first);
         }
     }
 
-    if (sentimentScore > 1)
-    {
-        sentimentScore = 1;
-    }
-    else if (sentimentScore < -1)
-    {
-        sentimentScore = -1;
-    }
-
-    return ((sentimentScore + 1) / 2) * 5;
+    return discardList;
 }
+
+bool RecommendationService::containsNegativeWords(const std::string &comment) {
+    std::vector<std::string> negativeWords = getNegativeWords();
+    for (const auto &word : negativeWords) {
+        if (comment.find(word) != std::string::npos) {
+            return true;
+        }
+    }
+    return false;
+}
+std::vector<std::string> getNegativeWords() {
+    return {"tasteless", "extremely bad", "very poor", "awful", "terrible", "not worth", "bad"};
+}
+
+std::vector<std::string> RecommendationService::sortRecommendedMenuItemsBasedOnProfile(
+    const std::string userProfile, 
+    const std::vector<std::string> chefRolloutMenuForNextDay) {
+
+    std::vector<std::string> sortedMenuItems = chefRolloutMenuForNextDay;
+
+    std::sort(sortedMenuItems.begin(), sortedMenuItems.end(), [&](const NextDayMenuRollOut& a, const NextDayMenuRollOut& b) {
+        int scoreA = 0, scoreB = 0;
+
+        // Get the MenuItem for each NextDayMenuRollOut item
+        auto itA = std::find_if(menuItems.begin(), menuItems.end(),
+                                [&](const MenuItem& item) { return item.menuItemId == a.menuItemId; });
+        auto itB = std::find_if(menuItems.begin(), menuItems.end(),
+                                [&](const MenuItem& item) { return item.menuItemId == b.menuItemId; });
+
+        if (itA != menuItems.end()) {
+            // Evaluate vegetarian preference
+            if (userProfile.vegetarianPreference == itA->vegetarianPreference) scoreA++;
+            // Evaluate spice level
+            if (userProfile.spiceLevelOption == itA->spiceLevelOption) scoreA++;
+            // Evaluate food preference
+            if (userProfile.foodPreference == itA->foodPreference) scoreA++;
+            // Evaluate sweet tooth preference
+            if (userProfile.sweetToothPreference == itA->sweetToothPreference) scoreA++;
+        }
+
+        if (itB != menuItems.end()) {
+            // Evaluate vegetarian preference
+            if (userProfile.vegetarianPreference == itB->vegetarianPreference) scoreB++;
+            // Evaluate spice level
+            if (userProfile.spiceLevelOption == itB->spiceLevelOption) scoreB++;
+            // Evaluate food preference
+            if (userProfile.foodPreference == itB->foodPreference) scoreB++;
+            // Evaluate sweet tooth preference
+            if (userProfile.sweetToothPreference == itB->sweetToothPreference) scoreB++;
+        }
+
+        // Higher score items should come first
+        return scoreA > scoreB;
+    });
+
+    return sortedMenuItems;
+}    

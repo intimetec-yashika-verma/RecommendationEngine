@@ -57,10 +57,11 @@ std::vector<std::string> RequestProcessor::processRequest(std::vector<std::strin
         {
             std::cout << "Chef LoggedIn" << std::endl;
             MenuDAO *menuDao = new MenuDAO();
+            FeedbackDAO  *feedbackDao  = new FeedbackDAO();
             PublishedMenuDAO *publishedMenuDAO = new PublishedMenuDAO();
             MenuService *menuService = new MenuService(menuDao);
             SelectedItemsDAO *selectedItemsDAO = new SelectedItemsDAO();
-            RecommendationService *recommendationService = new RecommendationService();
+            RecommendationService *recommendationService = new RecommendationService(menuDao,feedbackDao);
             SelectionService *selectionService = new SelectionService(selectedItemsDAO,publishedMenuDAO);
             NotificationDAO  *notificationDAO = new NotificationDAO();
             NotificationService *notificationService=new NotificationService(notificationDAO);

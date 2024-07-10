@@ -24,26 +24,27 @@ std::string FeedbackDAO::getLastUserId()
     std::cout<<row[0];
     return row[0];
 }
-Feedback *FeedbackDAO::getItemFeedback(const std::string &itemId)
+std::vector<std::pair<std::string, std::string>> FeedbackDAO::getItemFeedback(const std::string &itemId)
 {
     // std::cout<<"ids"<<std::endl;
+    std::vector<std::pair<std::string, std::string>> itemFeedbacks;
     std::string query = "SELECT rating, comment FROM feedback WHERE itemId ='" + itemId + "'";
     mysql_query(connection, query.c_str());
     MYSQL_RES *result = mysql_store_result(connection);
     MYSQL_ROW row;
-    Feedback *obj = new Feedback;
-    // std::cout<<"ids"<<std::endl;
     while ((row = mysql_fetch_row(result)))
     {
         // std::cout<<"yashika"<<row[0]<<std::endl;
         // std::cout<<"yashika"<<row[1]<<std::endl;
         // std::cout<<"ids"<<std::endl;
-        obj->rating = std::stoi(row[0]);
-        obj->comment = row[1];
+        std::pair<std::string, std::string> feedback;
+        feedback.first = row[0];
+        feedback.second = row[1];
+        itemFeedbacks.emplace_back(feedback);
         // std::cout<<"ids"<<std::endl;
     }
     mysql_free_result(result);
-    return obj;
+    return itemFeedbacks;
 }
 
 // std::unordered_map<std::string, Feedback> FeedbackDAO::getFeedbacks()
@@ -100,4 +101,42 @@ void FeedbackDAO::addItemFeedback(std::string id,std::string itemName, std::stri
     {
         std::cout << "Query executed successfully." << std::endl;
     }
+}
+
+std::unordered_map<std::string,std::vector<Feedback>> FeedbackDAO::fetchMenuItemsWithFeedback()
+{
+       std::unordered_map<std::string,std::vector<Feedback>> menuItems;
+    std::string query = "SELECT MenuItems.id, MenuItems.name, Feedback.rating, Feedback.comment "
+                        "FROM MenuItems JOIN Feedback ON MenuItems.id = Feedback.itemId";
+
+    if (mysql_query(connection, query.c_str())) {
+        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
+        mysql_close(connection);
+        return {};
+    }
+
+    MYSQL_RES *result = mysql_store_result(connection);
+    if (!result) {
+        std::cerr << "Result retrieval failed: " << mysql_error(connection) << std::endl;
+        mysql_close(connection);
+        return {};
+    }  
+ 
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result))) {
+     std::vector<Feedback> feedbacks; 
+        Feedback obj;
+        obj.rating=std::stoi(row[2]);
+        obj.comment=row[3];
+        std::string name = row[1];
+        feedbacks.push_back(obj);
+            if (menuItems.find(name) == menuItems.end()) {
+            menuItems[name] = feedbacks;
+        }
+
+        menuItems[name].push_back(obj); 
+    }
+
+    mysql_free_result(result);
+    return menuItems;
 }

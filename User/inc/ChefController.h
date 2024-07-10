@@ -18,6 +18,8 @@ class ChefController : public IUserController
     std::vector<std::string> getVotedItemsList();
     std::vector<std::string> publishTodaysMenu(std::vector<std::string> finalizedMenu);
     std::vector<std::string> selectedMenu;
+    std::vector<std::string> getDiscardedMenuItemsList();
+    std::vector<std::string> getFeedbackOnHomeReceipe(std::vector<std::string> itemName);
     private:
     RecommendationService *recommendationService;
     SelectionService *selectionService;

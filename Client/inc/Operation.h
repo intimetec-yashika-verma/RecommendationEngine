@@ -14,5 +14,8 @@ enum Operation : int
    ProvideFeedback = 11,
    VoteItemFromTomorrowMenu = 12,
    SaveVotingResponse = 13,
-   saveFeedback=14
+   saveFeedback=14,
+   discardMenuItem = 15,
+   getHomeReceipe = 16,
+   getDiscardedMenuItemsList = 17
 };

@@ -221,7 +221,8 @@ void ClientController::showChefMenu()
                      "1. Get Recommendation\n"
                      "2. Get list of voted Items\n"
                      "3. Update next day menu\n"
-                     "4. Exit\n"
+                     "4. Discard menu\n"
+                     "5. Exit\n"
                      "Enter your choice :- "
                   << std::endl;
         std::string chefChoice;
@@ -245,12 +246,12 @@ void ClientController::showChefMenu()
         }
         else if (chefChoice == "4")
         {
+            discardMenuItem();
+        }
+        else if (chefChoice == "5")
+        {
             client->sendMessage(userInput);
             flag = false;
-        }
-        else
-        {
-            std::cout << "Invalid Choice" << std::endl;
         }
     }
 }
@@ -373,9 +374,9 @@ void ClientController::showEmployeeMenu()
         {
             giveFeedback();
         }
-        else
+        else if(employeeChoice == "4")
         {
-            std::cout << "Invalid Choice" << std::endl;
+           giveReviewOnDiscardedItem();
         }
     }
 }
@@ -435,4 +436,50 @@ void ClientController::giveFeedback()
     std::cout<<input<<std::endl;
     client->sendMessage(input);
     menuItemList = client->receiveMessage();
+}
+
+void ClientController::discardMenuItem()
+{
+    std::vector<std::string> userResponse = {"15","discardList"};
+    client->sendMessage(userResponse);
+    std::vector<std::string> menuItemList = client->receiveMessage();
+    for(int i=0;i<menuItemList.size();i++)
+    {
+        std::cout<<menuItemList[i]<<std::endl;
+    }
+    std::cout<<"1. Discard Item\n"
+             "2. Ask Home recipe from employees\n";
+    std::string userInput;
+    std::cin>>userInput;
+    if(userInput == "1")
+    {
+        std::vector<std::string> userChoice = {"3",menuItemList[0]};
+        client->sendMessage(userChoice);
+    }
+    else if(userInput == "2")
+    {
+        std::vector<std::string> userChoice = {"16",menuItemList[0]};
+        client->sendMessage(userChoice);
+    }
+    std::vector<std::string> response = client->receiveMessage();
+}
+
+void ClientController::giveReviewOnDiscardedItem()
+{
+   std::vector<std::string> userResponse = {"17","review"};
+    client->sendMessage(userResponse);
+    std::vector<std::string> menuItemList = client->receiveMessage();
+    std::unordered_map<std::string,std::vector<std::string>> feedbacks;
+    feedbacks[menuItemList[0]]={"18"};
+    std::string userInput;
+    std::cout<<"What didn't you like about "<<menuItemList[0]<<std::endl;
+    std::getline(std::cin >> std::ws, userInput);
+    feedbacks[menuItemList[0]].push_back(userInput);
+    std::cout<<"How would you like "<<menuItemList[0]<<" to taste?"<<std::endl;
+    std::getline(std::cin >> std::ws, userInput);
+    feedbacks[menuItemList[0]].push_back(userInput);
+    std::cout<<"Share your mom’s recipe"<<std::endl;
+    std::getline(std::cin >> std::ws, userInput);
+    feedbacks[menuItemList[0]].push_back(userInput);
+    client->sendMessage(menuItemList[0]);
 }

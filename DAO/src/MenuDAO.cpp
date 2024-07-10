@@ -2,9 +2,9 @@
 #include "DatabaseConnection.h"
 #include "MenuItem.h"
 
-MenuDAO::MenuDAO(): dbConnection{DatabaseConnection::getInstance()}
+MenuDAO::MenuDAO() : dbConnection{DatabaseConnection::getInstance()}
 {
-    connection=dbConnection->getConnection();
+    connection = dbConnection->getConnection();
 }
 std::string MenuDAO::getLastUserId()
 {
@@ -12,24 +12,30 @@ std::string MenuDAO::getLastUserId()
     mysql_query(connection, "SELECT id FROM MenuItems ORDER BY id DESC LIMIT 1");
     MYSQL_RES *result = mysql_store_result(connection);
     MYSQL_ROW row = mysql_fetch_row(result);
-    std::cout<<row[0];
+    std::cout << row[0];
     return row[0];
 }
-void MenuDAO::addNewItem(std::string itemId, std::string name,std::string availablity, std::string price,  std::string mealType)
+void MenuDAO::addNewItem(std::string itemId, std::string name, std::string availablity, std::string price, std::string mealType)
 {
     std::string query = "INSERT INTO MenuItems (id, name,availability,price,mealType) VALUES ('" + itemId + "', '" + name + "','" + availablity + "','" + price + "','" + mealType + "')";
-    if (mysql_query(connection, query.c_str())) {
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
 }
-void MenuDAO::updateMenuItem(std::string name, std::string propertyName,std::string updatedValue)
+void MenuDAO::updateMenuItem(std::string name, std::string propertyName, std::string updatedValue)
 {
-    std::string query = "UPDATE MenuItems SET "+propertyName+" = '" + updatedValue +"' WHERE name = '"+updatedValue+"'";
-    if (mysql_query(connection, query.c_str())) {
+    std::string query = "UPDATE MenuItems SET " + propertyName + " = '" + updatedValue + "' WHERE name = '" + updatedValue + "'";
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
 }
@@ -60,12 +66,16 @@ std::vector<MenuItem> MenuDAO::fetchMenuItems()
     MYSQL_ROW row;
     while ((row = mysql_fetch_row(result)))
     {
-       MenuItem item;
-       item.itemName = row[1];
-       item.availability=row[2];
-       item.price=row[3];
-       item.mealType=row[4];
-       menuItems.push_back(item);
+        MenuItem item;
+        item.itemName = row[1];
+        item.availability = row[2];
+        item.price = row[3];
+        item.mealType = row[4];
+        item.VegetarianPreferance = row[5];
+        item.SpiceLevel = row[6];
+        item.FoodType = row[7];
+        item.Sweet = row[8];
+        menuItems.push_back(item);
     }
     mysql_free_result(result);
     return menuItems;
@@ -136,4 +146,19 @@ std::string MenuDAO::getIdFromName(std::string name)
     std::cout << row[0] << std::endl;
     mysql_free_result(result);
     return row[0];
+}
+
+std::vector<std::string> MenuDAO::getMenuItemsForMealType(std::string mealType)
+{
+    std::vector<std::string> itemsList ;
+    std::string query = "SELECT id FROM MenuItems WHERE mealType = '" + mealType + "'";
+    mysql_query(connection, query.c_str());
+    MYSQL_RES *result = mysql_store_result(connection);
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result)))
+    {
+        std::string data = row[0];
+        itemsList.push_back(data);
+    }
+    return itemsList;
 }

@@ -5,12 +5,12 @@
 class FeedbackDAO
 {
 public:
-FeedbackDAO();
-std::string getLastUserId();
-    Feedback *getItemFeedback(const std::string &item);
+    FeedbackDAO();
+    std::string getLastUserId();
+    std::vector<std::pair<std::string, std::string>> getItemFeedback(const std::string &item);
     std::unordered_map<std::string, Feedback> getFeedbacks();
-    void addItemFeedback(std::string id,std::string itemName, std::string rating, std::string comment);
-
+    void addItemFeedback(std::string id, std::string itemName, std::string rating, std::string comment);
+    std::unordered_map<std::string, std::vector<Feedback>> fetchMenuItemsWithFeedback();
 
 private:
     DatabaseConnection *dbConnection;

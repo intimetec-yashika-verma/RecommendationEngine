@@ -21,6 +21,8 @@ public:
     void showMenuToBeVoted();
     void voteForTomorrowMenu();
     void giveFeedback();
+    void discardMenuItem();
+    void giveReviewOnDiscardedItem();
 
 private:
     Client *client;

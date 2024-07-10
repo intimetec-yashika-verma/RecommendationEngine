@@ -11,9 +11,9 @@ Feedback *FeedbackService::getItemFeedback(const std::string &ItemId)
 {
     // std::cout<<"getItemFeedback"<<std::endl;
     // std::cout<<"getItemFeedback2"<<std::endl;
-    Feedback *obj = feedbackDAO->getItemFeedback(ItemId);
-    return obj;
-}
+    // Feedback *obj = feedbackDAO->getItemFeedback(ItemId);
+    // return obj;
+} 
 
 void FeedbackService::addItemFeedback(std::vector<std::string> itemList)
 {
@@ -36,3 +36,4 @@ void FeedbackService::addItemFeedback(std::vector<std::string> itemList)
         counter = counter + 3;
     }
 }
+

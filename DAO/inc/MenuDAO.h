@@ -16,6 +16,7 @@ public:
   std::vector<std::string> getItemIdsforMealType(std::string mealType);
   std::string getNameFromId(std::string itemId);
   std::string getIdFromName(std::string name);
+   std::vector<std::string> getMenuItemsForMealType(std::string mealType);
 
 private:
   DatabaseConnection *dbConnection;

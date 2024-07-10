@@ -10,9 +10,9 @@ ChefController::ChefController(RecommendationService *recommendationService, Sel
 }
 std::vector<std::string> ChefController::getRecommededMenu(std::string mealType)
 {
-    // RecommendationService recommendationService = RecommendationService();
-    // std::vector<std::string> topFoodItems = recommendationService.recommendTopFoodItems(mealType);
-    std::vector<std::string> topFoodItems = {"Poha", "Sandwich", "Pancakes", "Omelette"};
+  
+    std::vector<std::string> topFoodItems = recommendationService->recommendTopFoodItems (mealType);
+   
     return topFoodItems;
 }
 
@@ -43,8 +43,19 @@ std::vector<std::string> ChefController::handleRequest(std::pair<Operation, std:
         response = publishTodaysMenu(request.second);
         break;
     }
+    case discardMenuItem:
+    {
+        response = getDiscardedMenuItemsList();
+        break;
+    }
+    case getHomeReceipe:
+    {
+        response = getFeedbackOnHomeReceipe(request.second);
+        break;
+    }    
         return response;
     }
+
 }
 
 std::vector<std::string> ChefController::showRecommendations(std::vector<std::string> mealType)
@@ -93,4 +104,19 @@ std::vector<std::string> ChefController::getVotedItemsList()
 {
     std::vector<std::string> itemsList = selectionService->getVotedItemsList();
     return itemsList;
+}
+
+std::vector<std::string> ChefController::getDiscardedMenuItemsList()
+{
+     return recommendationService->generateDiscardList();
+}
+
+std::vector<std::string> ChefController::getFeedbackOnHomeReceipe(std::vector<std::string> itemName)
+{
+    std::string notificationMessage = "Please vote for the item you would like to have";
+    notificationService->sendNewNotification(4, "Give feedback on discarded item");
+    std::string success = "added feedback on home receipe";
+    std::cout << success << std::endl;
+    std::vector<std::string> response = {success};
+    return response;
 }
