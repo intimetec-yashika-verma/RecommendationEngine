@@ -5,7 +5,7 @@ class UserDAO
 {
     public:
    UserDAO();
-   User getUserData(std::string email,std::string userName);
+   UserProfile getUserData(std::string email,std::string userName);
    private:
    DatabaseConnection *dbConnection;
    MYSQL *connection;

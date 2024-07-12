@@ -128,40 +128,30 @@ std::vector<std::string> getNegativeWords() {
 
 std::vector<std::string> RecommendationService::sortRecommendedMenuItemsBasedOnProfile(
     const std::string userProfile, 
-    const std::vector<std::string> chefRolloutMenuForNextDay) {
+    const std::vector<MenuItem> chefRolloutMenuForNextDay) {
 
-    std::vector<std::string> sortedMenuItems = chefRolloutMenuForNextDay;
+    std::vector<MenuItem> sortedMenuItems = chefRolloutMenuForNextDay;
 
-    std::sort(sortedMenuItems.begin(), sortedMenuItems.end(), [&](const NextDayMenuRollOut& a, const NextDayMenuRollOut& b) {
+    std::sort(sortedMenuItems.begin(), sortedMenuItems.end(), [&](const MenuItem& a, const MenuItem& b) {
         int scoreA = 0, scoreB = 0;
 
-        // Get the MenuItem for each NextDayMenuRollOut item
-        auto itA = std::find_if(menuItems.begin(), menuItems.end(),
-                                [&](const MenuItem& item) { return item.menuItemId == a.menuItemId; });
-        auto itB = std::find_if(menuItems.begin(), menuItems.end(),
-                                [&](const MenuItem& item) { return item.menuItemId == b.menuItemId; });
-
-        if (itA != menuItems.end()) {
             // Evaluate vegetarian preference
-            if (userProfile.vegetarianPreference == itA->vegetarianPreference) scoreA++;
+            if (userProfile.vegetarianPreference == a.dietaryCategory) scoreA++;
             // Evaluate spice level
-            if (userProfile.spiceLevelOption == itA->spiceLevelOption) scoreA++;
+            if (userProfile.spiceLevelOption == a.SpiceLevel) scoreA++;
             // Evaluate food preference
-            if (userProfile.foodPreference == itA->foodPreference) scoreA++;
+            if (userProfile.foodPreference == a.cuisineCategory) scoreA++;
             // Evaluate sweet tooth preference
-            if (userProfile.sweetToothPreference == itA->sweetToothPreference) scoreA++;
-        }
-
-        if (itB != menuItems.end()) {
-            // Evaluate vegetarian preference
-            if (userProfile.vegetarianPreference == itB->vegetarianPreference) scoreB++;
+            if (userProfile.sweetToothPreference == a.Sweet) scoreA++;
+    
+            if (userProfile.vegetarianPreference == b.dietaryCategory) scoreB++;
             // Evaluate spice level
-            if (userProfile.spiceLevelOption == itB->spiceLevelOption) scoreB++;
+            if (userProfile.spiceLevelOption == b.SpiceLevel) scoreB++;
             // Evaluate food preference
-            if (userProfile.foodPreference == itB->foodPreference) scoreB++;
+            if (userProfile.foodPreference == b.cuisineCategory) scoreB++;
             // Evaluate sweet tooth preference
-            if (userProfile.sweetToothPreference == itB->sweetToothPreference) scoreB++;
-        }
+            if (userProfile.sweetToothPreference == b.Sweet) scoreB++;
+        
 
         // Higher score items should come first
         return scoreA > scoreB;

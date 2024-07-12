@@ -13,21 +13,10 @@ int main() {
         return 1;
     }
     
-    ClientController promptForClient=ClientController(client);
-    promptForClient.LoginPrompt();
+    ClientController clientController=ClientController(client);
+    clientController.run();
     std::vector<std::string> userRole= client->receiveMessage();
     std::cout<<"userRole"<<userRole[0]<<std::endl;
     promptForClient.showMenuPrompt(userRole[0]);
-    // std::string message = email + " " + password;
-    
-    // if (client.sendMessage(message)) {
-    //     std::cout << "Message sent to server: " << message << std::endl;
-
-    //     std::string response = client.receiveMessage();
-    //     std::cout << "Server response: " << response << std::endl;
-    // } else {
-    //     std::cerr << "Failed to send message to server." << std::endl;
-    // }
-
     return 0;
 }

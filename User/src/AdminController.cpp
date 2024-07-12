@@ -5,13 +5,13 @@
 #include "RequestSerializer.h"
 #include <iostream>
 #include <vector>
-AdminController::AdminController(MenuService *menuService) : menuService(menuService)
+AdminController::AdminController(MenuService *menuService, UserProfile userProfile) : menuService(menuService), userProfile(userProfile)
 {
 }
 
-std::vector<std::string> AdminController::handleRequest(std::pair<Operation, std::vector<std::string>> request)
+std::string AdminController::handleRequest(std::pair<Operation, std::string> request)
 {
-    std::vector<std::string> response;
+    std::string response;
     switch (request.first)
     {
     case AddMenuItem:
@@ -30,68 +30,48 @@ std::vector<std::string> AdminController::handleRequest(std::pair<Operation, std
         break;
 
     case ViewMenu:
-        std::cout<<"ViewMenuItems" <<std::endl;
-        response = viewMenuItems(); 
+        std::cout << "ViewMenuItems" << std::endl;
+        response = viewMenuItems();
     }
 
     return response;
 }
 
-std::vector<std::string> AdminController::addMenuItem(std::vector<std::string> adminChoice)
+std::string AdminController::addMenuItem(std::string adminChoice)
 {
-    std::vector<std::string> response;
-    MenuItem itemData = RequestSerializer::deserializeMenuItems(adminChoice);
+    MenuItem itemData;
+    itemData.deserialize(adminChoice);
     std::cout << "item Data" << itemData.itemName << itemData.price << itemData.availability << itemData.mealType << std::endl;
-    menuService->addItem(itemData.itemName, itemData.availability, itemData.price, itemData.mealType);
+    menuService->addItem(userProfile.userId, itemData.itemName, itemData.availability, itemData.price, itemData.mealType, itemData.dietaryCategory, itemData.spiceLevel, itemData.cuisineCategory, itemData.sweet);
     std::string success = "item added successfully";
-    std::cout << success << std::endl;
-    response.push_back(success);
-    return response;
+    return success;
 }
 
-std::vector<std::string> AdminController::updateMenuItem(std::vector<std::string> adminChoice)
+std::string AdminController::updateMenuItem(std::string adminChoice)
 {
     for (int i = 0; i < adminChoice.size(); i++)
     {
         std::cout << adminChoice[i] << " ,";
     }
-    std::cout << std::endl;
-    std::vector<std::string> response;
-    std::string updatedName = adminChoice[2];
-    std::cout << updatedName << std::endl;
     MenuItem itemData;
-    itemData.itemName = adminChoice[1];
-    std::cout << itemData.itemName << std::endl;
-    itemData.availability = adminChoice[3];
-    std::cout << itemData.availability << std::endl;
-    itemData.price = adminChoice[4];
-    std::cout << itemData.price << std::endl;
-    itemData.mealType = adminChoice[5];
-    std::cout << itemData.mealType << std::endl;
-    std::cout << itemData.itemName + updatedName + itemData.price + itemData.availability + itemData.mealType << std::endl;
-    menuService->updateItem(itemData.itemName, updatedName, itemData.price, itemData.availability, itemData.mealType);
+    std::cout << itemData.itemName + itemData.price + itemData.availability + itemData.mealType << std::endl;
+    menuService->updateItem(userProfile.userId, itemData.itemName, itemData.price, itemData.availability, itemData.mealType, itemData.dietaryCategory, itemData.spiceLevel, itemData.cuisineCategory, itemData.sweet);
     std::string success = "item updated successfully";
     std::cout << success << std::endl;
-    response.push_back(success);
-    return response;
+    return success;
 }
 
-std::vector<std::string> AdminController::deleteItemFromMenu(std::vector<std::string> adminChoice)
+std::string AdminController::deleteItemFromMenu(std::string adminChoice)
 {
-    std::vector<std::string> response;
-    std::string name = adminChoice[1];
-    std::cout<<name<<std::endl;
-    menuService->removeItem(name);
+    menuService->removeItem(userProfile.userId, adminChoice);
     std::string success = "Item removed";
-    std::cout<<success;
-    response.push_back(success);
-    return response;
-    
+    std::cout << success;
+    return success;
 }
 
-std::vector<std::string> AdminController::viewMenuItems()
+std::string AdminController::viewMenuItems()
 {
-    std::vector<MenuItem> menu = menuService->getMenuItem();
+    std::vector<MenuItem> menu = menuService->getMenuItem(userProfile.userId);
     std::vector<std::string> menuList = RequestSerializer::serializeMenuItemToString(menu);
     return menuList;
 }

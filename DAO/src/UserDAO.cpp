@@ -1,11 +1,12 @@
 #include "UserDAO.h"
 #include "DatabaseConnection.h"
 #include "User.h"
+#include "UserProfile.h"
 UserDAO::UserDAO() : dbConnection{DatabaseConnection::getInstance()}
 {
     connection = dbConnection->getConnection();
 }
-User UserDAO::getUserData(std::string email, std::string password)
+UserProfile UserDAO::getUserData(std::string email, std::string password)
 {
     std::string query = "SELECT * FROM users WHERE email = '" + email + "' AND password = '" + password + "'";
     if (mysql_query(connection, query.c_str()))
@@ -19,15 +20,15 @@ User UserDAO::getUserData(std::string email, std::string password)
         std::cerr << "Store result failed: " << mysql_error(connection) << std::endl;
 
     }
-
+    UserProfile userProfile;
     MYSQL_ROW   row = mysql_fetch_row(result);
-    std::string id=row[0];
-    std::string mail = row[1];
-    std::string userPassword = row[2];
-    int role = std::stoi(row[3]);
-    std::cout<<id+mail+userPassword+" ";
-    std::cout<<role<<std::endl;
+    userProfile.userId = row[0];
+    userProfile.role = row[3];
+    userProfile.dietaryCategory = row[4];
+    userProfile.spiceLevel = row[5];
+    userProfile.PreferanceType = row[6];
+    userProfile.SweetTooth = row[7];
     mysql_free_result(result);
-    User userData =User(id,mail,userPassword,role);
-    return userData;
+
+    return userProfile;
 }

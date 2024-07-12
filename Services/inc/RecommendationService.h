@@ -9,12 +9,6 @@
 class RecommendationService
 {
 public:
-    struct MenuItem
-    {
-        std::string name;
-        std::vector<std::string> foodItems;
-        
-    };
         FeedbackService *feedbackService_{nullptr};
         std::unordered_set<std::string> positiveWords_;
         std::unordered_set<std::string> negativeWords_;
@@ -25,9 +19,8 @@ public:
         double analyzeSentiment(const std::string &comment);
         std::vector<std::string> generateDiscardList();
         bool containsNegativeWords(const std::string &comment);
-        std::vector<std::string> sortRecommendedMenuItemsBasedOnProfile( const std::string userProfile, 
-    const std::vector<std::string> chefRolloutMenuForNextDay);
-        private:
+        std::vector<std::string> sortRecommendedMenuItemsBasedOnProfile( const std::string userProfile, const std::vector<MenuItem> chefRolloutMenuForNextDay);
+    private:
         MenuDAO *menuDao ;
         FeedbackDAO  *feedbackDao;
 };

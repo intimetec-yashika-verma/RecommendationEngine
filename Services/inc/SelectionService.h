@@ -10,7 +10,7 @@ class SelectionService{
     void addSelectedItems(std::vector<std::string> itemsList);
     std::vector<std::string> getVotedItemsList();
     void addPublishedMenu(std::vector<std::string>  itemsList );
-    std::vector<std::string> getListOfItemsToVote();
+    std::vector<MenuItem> getListOfItemsToVote();
     void saveVotes(std::vector<std::string> votedItems); 
     std::vector<std::string> getPublishedMenu();
     private:

@@ -61,8 +61,8 @@ std::vector<std::string> EmployeeController::showNotifications()
 
 std::vector<std::string> EmployeeController::voteForTomorrowMenu()
 {
-    std::vector<std::string> menuItems = selectionService->getListOfItemsToVote();
-    
+    std::vector<MenuItem> menuItems = selectionService->getListOfItemsToVote();
+     
     return menuItems;
 }
 

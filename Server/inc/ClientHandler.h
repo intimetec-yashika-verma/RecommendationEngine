@@ -11,6 +11,6 @@ private:
     RequestProcessor requestProcessor;
     StringSerializer stringSerializer;
     
-    bool sendRequest(std::vector<std::string> request);
-    std::vector<std::string> receiveRequest();
+    bool sendRequest(std::string request);
+    std::string receiveRequest();
 };

@@ -1,42 +1,68 @@
 #include "RequestSerializer.h"
+#include <iostream>
+#include <sstream>
 
-std::pair<Operation, std::vector<std::string>> RequestSerializer::deserializeOperation(std::vector<std::string> userRequest)
+std::pair<Operation, std::string>  RequestSerializer::deserializeOperation(const std::string &requestData)
 {
-    std::pair<Operation,std::vector<std::string>> userResponse;
-    int operationInt = std::stoi(userRequest[0]);
-    userResponse.first=static_cast<Operation>(operationInt);
-    userResponse.second=userRequest;
-    return userResponse;
-}
+      Operation first;
+      std::string second;
+    size_t pos = requestData.find('$');
 
-Login RequestSerializer::deserializeLoginCredentials(std::vector<std::string> userCredentials)
-{
-    Login loginCredentials;
-    loginCredentials.userName=userCredentials[1];
-    loginCredentials.password=userCredentials[2];
-    return loginCredentials;
-}
-
-MenuItem RequestSerializer::deserializeMenuItems(std::vector<std::string> itemsData)
-{
- MenuItem item;
- item.itemName=itemsData[1];
- item.availability=itemsData[2];
- item.price=itemsData[3];
- item.mealType=itemsData[4];
- return item;
-}
-
-std::vector<std::string> RequestSerializer::serializeMenuItemToString(std::vector<MenuItem> menuItems)
-{
-    std::vector<std::string> stringList;
-    for(int i=0;i<menuItems.size();i++)
-    {
-       stringList.push_back(menuItems[i].itemName);
-       stringList.push_back(menuItems[i].availability);
-       stringList.push_back(menuItems[i].price);
-       stringList.push_back(menuItems[i].mealType); 
-
+    if (pos != std::string::npos) {
+        first = static_cast<Operation>(std::stoi(requestData.substr(0, pos)));
+        second = requestData.substr(pos + 1);
     }
-    return stringList;
+    else
+    {
+        first = static_cast<Operation>(std::stoi(requestData));
+    }
+    return std::make_pair(first, second);
+}
+
+std::vector<MenuItem> deserializeMenuItems(const std::string& serializedData) {
+    std::vector<MenuItem> menuItems;
+    std::istringstream iss(serializedData);
+    std::string itemData;
+
+    while (std::getline(iss, itemData, '&')) {  // Split by '&' delimiter
+        MenuItem menuItem;
+        std::istringstream itemStream(itemData);
+        std::string segment;
+        int segmentCount = 0;
+
+        while (std::getline(itemStream, segment, ',')) {  // Split by ',' delimiter
+            switch (segmentCount) {
+                case 0:
+                    menuItem.itemName = segment;
+                    break;
+                case 1: 
+                    menuItem.availability = segment;
+                    break;      
+                case 2: 
+                    menuItem.price = segment;
+                    break;
+                case 3:
+
+                    menuItem.mealType = segment;
+                    break;
+                case 4:
+                    menuItem.dietaryCategory = segment;
+                    break;
+                case 5:
+                    menuItem.spiceLevel = segment;
+                    break;  
+                case 6:
+                    menuItem.cuisineCategory = segment;
+                    break;
+                case 7:
+                    menuItem.sweet = segment;
+                    break;             
+            }
+            segmentCount++;
+        }
+
+        menuItems.push_back(menuItem);
+    }
+
+    return menuItems;
 }

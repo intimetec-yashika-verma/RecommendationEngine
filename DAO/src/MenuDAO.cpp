@@ -6,18 +6,10 @@ MenuDAO::MenuDAO() : dbConnection{DatabaseConnection::getInstance()}
 {
     connection = dbConnection->getConnection();
 }
-std::string MenuDAO::getLastUserId()
+
+void MenuDAO::addNewItem(std::string userId, std::string name, std::string availablity, std::string price, std::string mealType,std::string dietaryCategory, std::string spiceLevel, std::string cuisineCategory, std::string sweet)
 {
-    std::string lastUserId = "user000";
-    mysql_query(connection, "SELECT id FROM MenuItems ORDER BY id DESC LIMIT 1");
-    MYSQL_RES *result = mysql_store_result(connection);
-    MYSQL_ROW row = mysql_fetch_row(result);
-    std::cout << row[0];
-    return row[0];
-}
-void MenuDAO::addNewItem(std::string itemId, std::string name, std::string availablity, std::string price, std::string mealType)
-{
-    std::string query = "INSERT INTO MenuItems (id, name,availability,price,mealType) VALUES ('" + itemId + "', '" + name + "','" + availablity + "','" + price + "','" + mealType + "')";
+    std::string query = "CALL AddMenuItem('" + userId + "','" + name + "','" + price + "','" + availablity + "','" + mealType + "','" + dietaryCategory + "','" + spiceLevel + "','" + cuisineCategory + "','" + sweet + "')";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
@@ -27,26 +19,46 @@ void MenuDAO::addNewItem(std::string itemId, std::string name, std::string avail
         std::cout << "Query executed successfully." << std::endl;
     }
 }
-void MenuDAO::updateMenuItem(std::string name, std::string propertyName, std::string updatedValue)
+void MenuDAO::updateMenuItem(std::string userId,std::string name, std::string propertyName, std::string updatedValue)
 {
-    std::string query = "UPDATE MenuItems SET " + propertyName + " = '" + updatedValue + "' WHERE name = '" + updatedValue + "'";
+    std::string query = "UPDATE MenuItems SET " + propertyName + " = '" + updatedValue + "' WHERE name = '" + name + "'";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
     }
     else
     {
+        std::string query1 = "INSERT INTO UserActivity (userId, activity) VALUES ("+ userId +",CONCAT('Updated '"+propertyName+" of "+name+"to "+updatedValue+")";
+        mysql_query(connection, query1.c_str());
+        
+        std::string query3 = "INSERT INTO Notification (message) VALUES (CONCAT('Updated '"+propertyName+" of "+name+"to "+updatedValue+")";
+        mysql_query(connection, query3.c_str());
+        std::string query2 = "SELECT LAST_INSERT_ID() AS notification_id";
+        mysql_query(connection, query2.c_str());
+        MYSQL_RES *result = mysql_store_result(connection);
+         MYSQL_ROW row;
+         std::string notificationId;
+        while (row = mysql_fetch_row(result))
+        {
+            notificationId = row[0];
+        }
+        std::string query4 = "INSERT INTO NotificationSeenStatus (user_id, notification_id) SELECT id,"+notificationId +"FROM User  WHERE Role = 'Employee'";
+        if (mysql_query(connection, query4.c_str()))
+       {
+        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
+        }
         std::cout << "Query executed successfully." << std::endl;
+
     }
 }
 
-void MenuDAO::removeMenuItem(std::string name)
+void MenuDAO::removeMenuItem(std::string userId,std::string name)
 {
-    std::string query = "DELETE FROM MenuItems WHERE name = '" + name + "'";
+    std::string query ="CALL DeleteMenuItemAndNotify('"+name+"','"+userId+"')";
     mysql_query(connection, query.c_str());
 }
 
-std::vector<MenuItem> MenuDAO::fetchMenuItems()
+std::vector<MenuItem> MenuDAO::fetchMenuItems(std::string userId)
 {
     std::vector<MenuItem> menuItems;
     std::string query = "SELECT * FROM MenuItems";
@@ -71,13 +83,16 @@ std::vector<MenuItem> MenuDAO::fetchMenuItems()
         item.availability = row[2];
         item.price = row[3];
         item.mealType = row[4];
-        item.VegetarianPreferance = row[5];
-        item.SpiceLevel = row[6];
-        item.FoodType = row[7];
-        item.Sweet = row[8];
+        item.dietaryCategory = row[5];
+        item.spiceLevel = row[6];
+        item.cuisineCategory = row[7];
+        item.sweet = row[8];
         menuItems.push_back(item);
     }
     mysql_free_result(result);
+    
+        std::string query1 = "INSERT INTO UserActivity (userId, activity) VALUES ("+ userId +",CONCAT('View Menu Items')";
+        mysql_query(connection, query1.c_str());
     return menuItems;
 }
 

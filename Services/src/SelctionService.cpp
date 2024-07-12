@@ -29,7 +29,7 @@ void SelectionService::addPublishedMenu(std::vector<std::string> itemsList)
     }
 }
 
-std::vector<std::string> SelectionService::getListOfItemsToVote()
+std::vector<MenuItem> SelectionService::getListOfItemsToVote()
 {
    return selectedItemsDAO->getSelectedItems();
 }

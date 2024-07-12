@@ -2,11 +2,11 @@
 enum Operation : int
 {
    login = 1,
-   AddMenuItem = 2,
-   DeleteMenuItem = 3,
-   UpdateMenuItem = 4,
-   ViewMenu = 5,
-   GetRecommandationFromEngine = 6,
+   addMenuItem = 2,
+   deleteMenuItem = 3,
+   updateMenuItem = 4,
+   viewMenu = 5,
+   getRecommandationFromEngine = 6,
    SelectMenuForNextDay = 7,
    GetVoteCountList = 8,
    PublishMenuForToday = 9,

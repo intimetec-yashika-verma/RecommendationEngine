@@ -7,50 +7,55 @@ MenuService::MenuService(MenuDAO *menuDAO):menuDAO(menuDAO)
 {
 
 }
-bool MenuService::addItem(std::string name,std::string availablity,std::string price,std::string mealType)
+bool MenuService::addItem(std::string userId,std::string name,std::string availablity,std::string price,std::string mealType,std::string dietaryCategory,std::string spiceLevel,std::string cuisineCategory,std::string sweet)
 {
-    std::string lastId=menuDAO->getLastUserId();
-    std::cout<<"lastId"<<lastId<<std::endl;
-    int num = std::stoi(lastId.substr(4)) + 1;
-
-    std::ostringstream oss;
-    oss << "ITEM" << std::setw(3) << std::setfill('0') << num;
-    std::string newId =oss.str();
-    std::cout<<"newId"<<newId<<std::endl;
-    menuDAO->addNewItem(newId,name,availablity,price,mealType);
+ 
+    menuDAO->addNewItem(userId,name,availablity,price,mealType,dietaryCategory,spiceLevel,cuisineCategory,sweet);
     return true;
 } 
 
-bool MenuService::updateItem(std::string name,std::string updatedName,std::string price,std::string availability,std::string mealType)
+bool MenuService::updateItem(std::string userId,std::string name,std::string price,std::string availability,std::string mealType,std::string dietaryCategory,std::string spiceLevel,std::string cuisineCategory,std::string sweet)
 {
-   if(updatedName!="")
-   {
-       menuDAO->updateMenuItem(name,"name",updatedName);
-   }
    if(price!="")
    {
-       menuDAO->updateMenuItem(name,"price",price);
+       menuDAO->updateMenuItem(userId,name,"price",price);
    }
    if(availability!="")
    {
-       menuDAO->updateMenuItem(name,"availability",availability);
+       menuDAO->updateMenuItem(userId,name,"availability",availability);
    }
    if(mealType!="")
    {
-    menuDAO->updateMenuItem(name,"mealType",mealType);
+    menuDAO->updateMenuItem(userId,name,"mealType",mealType);
+   }
+   if(dietaryCategory!="")
+   {
+    menuDAO->updateMenuItem(userId,name,"dietaryCategory",dietaryCategory);
+   }
+   if(spiceLevel!="")
+   {
+    menuDAO->updateMenuItem(userId,name,"spiceLevel",spiceLevel);
+   }
+   if(cuisineCategory!="")
+   {
+    menuDAO->updateMenuItem(userId,name,"cuisineCategory",cuisineCategory);
+   }
+   if(sweet!="")
+   {
+    menuDAO->updateMenuItem(userId,name,"sweet",sweet);
    }
    return true;
 }
 
-bool MenuService::removeItem(std::string name)
+bool MenuService::removeItem(std::string userId,std::string name)
 {
-    menuDAO->removeMenuItem(name);
+    menuDAO->removeMenuItem(userId,name);
     return true;
 }
 
-std::vector<MenuItem> MenuService::getMenuItem()
+std::vector<MenuItem> MenuService::getMenuItem(std::string userId)
 {
-    std::vector<MenuItem> menuItems = menuDAO->fetchMenuItems();
+    std::vector<MenuItem> menuItems = menuDAO->fetchMenuItems(userId);
     return menuItems;
 }
  std::vector<std::string> MenuService::getMenuItemIdsForMealType(std::string mealType)

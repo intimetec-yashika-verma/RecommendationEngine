@@ -17,9 +17,8 @@ class RequestProcessor {
 public:
     IUserController* userController;
     RequestProcessor();
-    std::vector<std::string> processRequest(std::vector<std::string> request);
-    Role userRole;
+    std::string processRequest(std::string request);
     bool isUserLoggedIn = false;
-    std::string userId;
+    UserProfile userProfile;
 };
 

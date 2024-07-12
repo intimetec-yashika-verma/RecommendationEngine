@@ -18,7 +18,7 @@ public:
     bool connectToServer();
     bool sendMessage(std::string message);
     bool sendMessage(std::vector<std::string> message);
-    std::vector<std::string> receiveMessage();
+    std::string receiveMessage();
 
 private:
     int clientSocket;

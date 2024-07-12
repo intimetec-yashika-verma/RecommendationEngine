@@ -1,17 +1,17 @@
 #include "AuthenticationController.h"
-#include "RequestSerializer.h"
 #include <utility>
-#include "Login.h"
+#include "LoginCredential.h"
+#include "UserProfile.h"
 
 AuthenticationController::AuthenticationController(UserService *userService)
 : userService(userService) {}
 
-int AuthenticationController::authenticateUser(std::vector<std::string> userData)
+UserProfile AuthenticationController::authenticateUser(std::string userData)
 {
 
-    Login userCredentials = RequestSerializer::deserializeLoginCredentials(userData);
-    std::cout<<userCredentials.userName<<" "<<userCredentials.password<<std::endl;
-    int role = userService->authenticateUser(userCredentials.userName,userCredentials.password);
-    std::cout<<"role "<<role<<std::endl;
-   return role;
+    LoginCredential loginCredentials;
+    loginCredentials.deserialize(userData);
+    std::cout<<loginCredentials.emailId<<" "<<loginCredentials.password<<std::endl;
+    UserProfile userProfile = userService->authenticateUser(loginCredentials.emailId,loginCredentials.password);
+   return userProfile;
 }

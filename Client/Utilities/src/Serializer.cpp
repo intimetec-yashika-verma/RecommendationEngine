@@ -1,4 +1,5 @@
 #include "Serializer.h"
+#include "MenuItem.h"
 #include <sstream>
 #include <iostream>
 
@@ -17,3 +18,21 @@ std::string Serializer::serializeFeedbacks(const std::unordered_map<std::string,
     }
     return oss.str();
 }
+
+std::string Serializer::serializeMenuItems(const MenuItem& menuItem) {
+    std::ostringstream oss;
+
+        oss << menuItem.itemId << ","
+            << menuItem.itemName << ","
+            << menuItem.availability << ","
+            << menuItem.price << ","
+            << menuItem.mealType << ","
+            << menuItem.dietaryCategory << ","
+            << menuItem.SpiceLevel << ","
+            << menuItem.cuisineCategory << ","
+            << menuItem.Sweet; 
+        return oss.str();        
+    }
+
+
+

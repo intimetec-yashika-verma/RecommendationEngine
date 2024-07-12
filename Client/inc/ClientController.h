@@ -1,10 +1,12 @@
 #include "Client.h"
+#include "Role.h"
 
 class ClientController
 {
 public:
     ClientController(Client *client);
-    void LoginPrompt();
+    void run();
+    Role loginPrompt();
     void showMenuPrompt(std::string userRole);
     int showAdminMenu();
     void showMenu();
@@ -26,5 +28,5 @@ public:
 
 private:
     Client *client;
-    std::string clientRole; 
+    IUserInterface *userInterface;
 };

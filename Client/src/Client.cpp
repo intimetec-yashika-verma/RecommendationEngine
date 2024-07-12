@@ -72,7 +72,7 @@ bool Client::sendMessage(std::vector<std::string> message)
     return true;
 }
 
-std::vector<std::string> Client::receiveMessage()
+std::string Client::receiveMessage()
 {
     char buffer[1024];
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
@@ -90,8 +90,6 @@ std::vector<std::string> Client::receiveMessage()
     {
         buffer[bytesRead] = '\0';
         std::string str(buffer);
-        StringSerializer stringSerializer = StringSerializer();
-        std::vector<std::string> receivedVector = stringSerializer.deserialize(str);
-        return receivedVector;
+        return str;
     }
 }

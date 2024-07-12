@@ -8,5 +8,5 @@ class AuthenticationController
     public:
     UserService* userService;
     AuthenticationController(UserService *userService);
-    int authenticateUser(std::vector<std::string> userData);
+    UserProfile authenticateUser(std::string userData);
 };
