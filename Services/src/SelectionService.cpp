@@ -2,31 +2,24 @@
 #include "SelectedItemsDAO.h"
 #include "MenuService.h"
 #include "PublishedMenuDAO.h"
+#include "VoteCount.h" 
 
-SelectionService::SelectionService(SelectedItemsDAO *selectedItemsDAO, PublishedMenuDAO *publishedMenuDAO) : selectedItemsDAO(selectedItemsDAO), publishedMenuDAO(publishedMenuDAO)
+SelectionService::SelectionService(SelectedItemsDAO *selectedItemsDAO) : selectedItemsDAO(selectedItemsDAO)
 {
 }
 void SelectionService::addSelectedItems(std::vector<std::string> itemsList)
 {
     std::cout << itemsList.size() << std::endl;
-    for (int i = 0; i < itemsList.size(); i++)
+    for (int i = 1; i < itemsList.size(); i++)
     {
         selectedItemsDAO->addSlectedItems(itemsList[i]);
-    }
+    }    
 }
 
-std::vector<std::string> SelectionService::getVotedItemsList()
+std::vector<VoteCount> SelectionService::getVotedItemsList(std::string mealType)
 {
-    std::vector<std::string> itemsList = selectedItemsDAO->getSelectedItemsAndVotes();
+    std::vector<VoteCount> itemsList = selectedItemsDAO->getSelectedItemsAndVotes(mealType);
     return itemsList;
-}
-
-void SelectionService::addPublishedMenu(std::vector<std::string> itemsList)
-{
-    for(int i=0;i<itemsList.size();i++)
-    {
-       publishedMenuDAO->addItems(itemsList[i]);
-    }
 }
 
 std::vector<MenuItem> SelectionService::getListOfItemsToVote()
@@ -43,7 +36,7 @@ void SelectionService::saveVotes(std::vector<std::string> votedItems)
     }
 }
 
-std::vector<std::string> SelectionService::getPublishedMenu()
+std::vector<MenuItem> SelectionService::getListOfItemsToVoteForMealType(std::string mealType)
 {
-    return publishedMenuDAO->getItems();
+    return selectedItemsDAO->getSelectedItemForMealType(mealType);
 }

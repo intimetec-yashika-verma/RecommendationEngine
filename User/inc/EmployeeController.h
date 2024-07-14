@@ -3,21 +3,31 @@
 #include "NotificationService.h"
 #include "SelectionService.h"
 #include "FeedbackService.h"
+#include "MenuService.h"
+#include "PublishMenuService.h"
+#include "DiscardMenuItemService.h"
+#include "RecommendationService.h"
+
 class EmployeeController : public IUserController
 {
-   public:
-   EmployeeController(NotificationService* notificationService,SelectionService *selectionService,FeedbackService *feedbackService,std::string userId);
-   void loginEmployee();
-   void performEmployeeAction();
-   std::vector<std::string> showNotifications();
-   std::vector<std::string> handleRequest(std::pair<Operation, std::vector<std::string>> userRequest) ;
-   std::vector<std::string> voteForTomorrowMenu();
-   std::vector<std::string> getVottedItems(std::vector<std::string> response);
-   std::vector<std::string> getItemsListForFeedback();
-   std::vector<std::string> getUserFeedback(std::vector<std::string> response);
-   private:
+public:
+   EmployeeController(NotificationService *notificationService, SelectionService *selectionService, FeedbackService *feedbackService, RecommendationService *recommendationService, MenuService *menuService, PublishMenuService *publishMenuService,DiscardMenuItemService *discardMenuItemService, UserProfile userProfile);
+   std::string showNotifications();
+   std::string handleRequest(std::pair<Operation, std::string> userRequest);
+   std::string voteForTomorrowMenu(std::string mealType);
+   std::string getVotedItems(std::string response);
+   std::string getItemsListForFeedback();
+   std::string getUserFeedback(std::string response);
+   std::string getDiscardedMenuItems();
+   std::string getFeedbackOnDiscardedItem(std::string itemName);
+
+private:
    NotificationService *notificationService;
    SelectionService *selectionService;
    FeedbackService *feedbackService;
-   std::string userId;
+   RecommendationService *recommendationService;
+   PublishMenuService *publishMenuService;
+   DiscardMenuItemService *discardMenuItemService;
+   UserProfile userProfile;
+   MenuService *menuService;
 };

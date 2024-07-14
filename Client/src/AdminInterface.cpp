@@ -18,7 +18,8 @@ void AdminInterface::showUserMenuPrompt()
                      "2. Update menu Item\n"
                      "3. Delete Menu Item\n"
                      "4. View Menu\n"
-                     "5. Exit\n"
+                     "5. Logout\n"
+                     "6. Exit\n"
                      "Enter your choice :- "
                   << std::endl;
         std::string adminChoice;
@@ -45,11 +46,16 @@ void AdminInterface::showUserMenuPrompt()
         }
         else if (adminChoice == "5")
         {
-            flag = false;
+           
+           logout();
+        }
+        else if(adminChoice == "6")
+        {
+           flag = false;
         }
         else
         {
-            std::cout << "Invalid Choice" << std::endl;
+             std::cout << "Invalid Choice" << std::endl;
         }
     }
 }
@@ -58,22 +64,23 @@ void AdminInterface::showAddItemPrompt()
 {
     MenuItem itemData;
     std::cout << "Enter Item name:- " << std::endl;
-    std::cin >> itemData.itemName;
+    std::getline(std::cin >> std::ws, itemData.itemName);
     std::cout << "Enter Item availablity:- " << std::endl;
-    std::cin >> itemData.availability;
+    std::getline(std::cin >> std::ws, itemData.availability);
     std::cout << "Enter Item price:- " << std::endl;
-    std::cin >> itemData.price;
+    std::getline(std::cin >> std::ws, itemData.price);
     std::cout << "Enter meal type(breakfast/lunch/dinner):- " << std::endl;
-    std::cin >> itemData.mealType;
+    std::getline(std::cin >> std::ws, itemData.mealType);
     std::cout << "Is it vegetarian, non-vegetarian or Eggetarian? " << std::endl;
-    std::cin >> itemData.dietaryCategory;
+    std::getline(std::cin >> std::ws, itemData.dietaryCategory);
     std::cout <<"What it the spice level of it ?(High/Medium/Low) "<<std::endl;
-    std::cin>> itemData.spiceLevel;
+    std::getline(std::cin >> std::ws, itemData.spiceLevel);
     std::cout << "Enter the cuisine type:- " << std::endl;
-    std::cin>> itemData.cuisineCategory;
+    std::getline(std::cin >> std::ws, itemData.cuisineCategory);
     std::cout << "Is it a sweet dish? " << std::endl;
-    std::cin >> itemData.sweet;
+    std::getline(std::cin >> std::ws, itemData.sweet);
     std::string userInput = std::to_string(Operation::addMenuItem) +"$"+ itemData.serialize();
+    std::cout<<"userInput "<<userInput<<std::endl;
     client->sendMessage(userInput);
     std::string serverResponse = client->receiveMessage();
 }
@@ -168,4 +175,12 @@ void AdminInterface::showMenu()
     client->sendMessage(userResponse);
     std::string serverResponse = client->receiveMessage();
     
+}
+
+void AdminInterface::logout()
+{
+    std::string userResponse = std::to_string(Operation::logout);
+    client->sendMessage(userResponse);
+    std::string serverResponse = client->receiveMessage();
+    return;
 }

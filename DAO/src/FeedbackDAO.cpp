@@ -24,24 +24,20 @@ std::string FeedbackDAO::getLastUserId()
     std::cout<<row[0];
     return row[0];
 }
-std::vector<std::pair<std::string, std::string>> FeedbackDAO::getItemFeedback(const std::string &itemId)
+std::pair<std::string,std::vector<Feedback>> FeedbackDAO::getItemFeedback(const std::string &itemId)
 {
     // std::cout<<"ids"<<std::endl;
-    std::vector<std::pair<std::string, std::string>> itemFeedbacks;
+    std::pair<std::string,std::vector<Feedback>> itemFeedbacks;
     std::string query = "SELECT rating, comment FROM feedback WHERE itemId ='" + itemId + "'";
     mysql_query(connection, query.c_str());
     MYSQL_RES *result = mysql_store_result(connection);
     MYSQL_ROW row;
     while ((row = mysql_fetch_row(result)))
     {
-        // std::cout<<"yashika"<<row[0]<<std::endl;
-        // std::cout<<"yashika"<<row[1]<<std::endl;
-        // std::cout<<"ids"<<std::endl;
-        std::pair<std::string, std::string> feedback;
-        feedback.first = row[0];
-        feedback.second = row[1];
-        itemFeedbacks.emplace_back(feedback);
-        // std::cout<<"ids"<<std::endl;
+       Feedback feedback;
+        feedback.rating = std::stoi(row[0]);
+        feedback.comment = row[1];
+        itemFeedbacks.second.push_back(feedback);
     }
     mysql_free_result(result);
     return itemFeedbacks;
@@ -90,9 +86,9 @@ std::vector<std::pair<std::string, std::string>> FeedbackDAO::getItemFeedback(co
 
 // }
 
-void FeedbackDAO::addItemFeedback(std::string id,std::string itemName, std::string rating, std::string comment)
+void FeedbackDAO::addItemFeedback(std::string userId,std::string itemName, std::string rating, std::string comment)
 {
-    std::string query = "INSERT INTO feedback (feedbackId, userId,itemId,rating,comment) VALUES ('" + id + "', 'USER003','" + itemName + "','" + rating + "','" + comment + "')";
+    std::string query = "INSERT INTO Feedback (feedbackId, userId,itemName,rating,comment) VALUES ('" + userId + "','" + itemName + "','" + rating + "','" + comment + "')";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
@@ -139,4 +135,49 @@ std::unordered_map<std::string,std::vector<Feedback>> FeedbackDAO::fetchMenuItem
 
     mysql_free_result(result);
     return menuItems;
+}
+
+std::unordered_map<std::string, std::vector<Feedback>> FeedbackDAO::getItemFeedbacks()
+{
+    std::unordered_map<std::string, std::vector<Feedback>> feedbackMap;
+    std::string query = "SELECT MenuItem.name, Feedback.rating, Feedback.comment "
+                        "FROM MenuItems JOIN Feedback ON MenuItems.id = Feedback.itemId";
+    if (mysql_query(connection, query.c_str()))
+    {
+        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
+        return feedbackMap;
+    }
+
+    MYSQL_RES *result = mysql_store_result(connection);
+    if (!result)
+    {
+        std::cerr << "Result retrieval failed: " << mysql_error(connection) << std::endl;
+        return feedbackMap;
+    }
+
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result)))
+    {
+        std::string itemName = row[0];
+        Feedback feedback;
+        feedback.rating = std::stoi(row[1]);
+        feedback.comment = row[2];
+        feedbackMap[itemName].push_back(feedback);
+    }
+
+    mysql_free_result(result);
+    return feedbackMap;
+}
+
+void FeedbackDAO::addFeedbackOnDiscaredItems(std::string userId,std::string itemName,std::string negativePoint,std::string improvement,std::string homeReceipe)
+{
+    std::string query = "INSERT INTO DiscardedMenuItemsFeedback (userId,itemName,negative_point,improvement,home_recipe) VALUES ('" + userId + "','" + itemName + "','" + negativePoint + "','" + improvement + "','" + homeReceipe + "')";
+    if (mysql_query(connection, query.c_str()))
+    {
+        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
+    }
+    else
+    {
+        std::cout << "Query executed successfully." << std::endl;
+    }
 }

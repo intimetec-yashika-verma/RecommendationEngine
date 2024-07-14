@@ -4,6 +4,7 @@
 #include "Server.h"
 #include "Role.h"
 #include "IUserController.h"
+#include "UserProfile.h"
 class RequestProcessor {
     private :
     // AuthenticationController* authenticationController;

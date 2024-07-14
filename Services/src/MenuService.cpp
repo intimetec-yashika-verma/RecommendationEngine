@@ -16,31 +16,31 @@ bool MenuService::addItem(std::string userId,std::string name,std::string availa
 
 bool MenuService::updateItem(std::string userId,std::string name,std::string price,std::string availability,std::string mealType,std::string dietaryCategory,std::string spiceLevel,std::string cuisineCategory,std::string sweet)
 {
-   if(price!="")
+   if(price!="0")
    {
        menuDAO->updateMenuItem(userId,name,"price",price);
    }
-   if(availability!="")
+   if(availability!="0")
    {
        menuDAO->updateMenuItem(userId,name,"availability",availability);
    }
-   if(mealType!="")
+   if(mealType!="0")
    {
     menuDAO->updateMenuItem(userId,name,"mealType",mealType);
    }
-   if(dietaryCategory!="")
+   if(dietaryCategory!="0")
    {
     menuDAO->updateMenuItem(userId,name,"dietaryCategory",dietaryCategory);
    }
-   if(spiceLevel!="")
+   if(spiceLevel!="0")
    {
     menuDAO->updateMenuItem(userId,name,"spiceLevel",spiceLevel);
    }
-   if(cuisineCategory!="")
+   if(cuisineCategory!="0")
    {
     menuDAO->updateMenuItem(userId,name,"cuisineCategory",cuisineCategory);
    }
-   if(sweet!="")
+   if(sweet!="0")
    {
     menuDAO->updateMenuItem(userId,name,"sweet",sweet);
    }
@@ -53,9 +53,9 @@ bool MenuService::removeItem(std::string userId,std::string name)
     return true;
 }
 
-std::vector<MenuItem> MenuService::getMenuItem(std::string userId)
+std::vector<MenuItem> MenuService::getMenuItem()
 {
-    std::vector<MenuItem> menuItems = menuDAO->fetchMenuItems(userId);
+    std::vector<MenuItem> menuItems = menuDAO->fetchMenuItems();
     return menuItems;
 }
  std::vector<std::string> MenuService::getMenuItemIdsForMealType(std::string mealType)

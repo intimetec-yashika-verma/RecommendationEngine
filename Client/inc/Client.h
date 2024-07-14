@@ -17,7 +17,6 @@ public:
 
     bool connectToServer();
     bool sendMessage(std::string message);
-    bool sendMessage(std::vector<std::string> message);
     std::string receiveMessage();
 
 private:

@@ -47,23 +47,7 @@ bool Client::sendMessage(std::string message)
 {
     // std::cout<<messageToSent.c_str()<<std::endl;
     ssize_t bytesSent = send(clientSocket, message.c_str(), message.size(), 0);
-    //std::cout<<bytesSent<<std::endl;
-    if (bytesSent == -1)
-    {
-        std::cerr << "Send failed." << std::endl;
-        return false;
-    }
-    return true;
-}
-bool Client::sendMessage(std::vector<std::string> message)
-{
-
-    StringSerializer stringSerializer = StringSerializer();
-    std::string messageToSent = stringSerializer.serialize(message);
-    std::cout<<"messageToSent:-"<<messageToSent<<std::endl;
-    // std::cout<<messageToSent.c_str()<<std::endl;
-    ssize_t bytesSent = send(clientSocket, messageToSent.c_str(), messageToSent.size(), 0);
-    //std::cout<<bytesSent<<std::endl;
+    std::cout<<bytesSent<<std::endl;
     if (bytesSent == -1)
     {
         std::cerr << "Send failed." << std::endl;

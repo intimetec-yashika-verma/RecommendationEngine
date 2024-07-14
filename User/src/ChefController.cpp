@@ -4,38 +4,44 @@
 #include "Server.h"
 #include "SelectionService.h"
 #include "Operation.h"
+#include "ItemReview.h"
+#include "RequestSerializer.h"
+#include "StringSerializer.h"
+#include "UserActivityService.h"
+#include "PublishMenuService.h"
 
-ChefController::ChefController(RecommendationService *recommendationService, SelectionService *selectionService, NotificationService *notificationService, MenuService *menuService) : recommendationService(recommendationService), selectionService(selectionService), notificationService(notificationService), menuService(menuService)
+ChefController::ChefController(RecommendationService *recommendationService, SelectionService *selectionService, NotificationService *notificationService, MenuService *menuService, FeedbackService *feedbackService, PublishMenuService *publishMenuService,UserActivityService *userActivityService, DiscardMenuItemService *discardMenuItemService, UserProfile userProfile) : recommendationService(recommendationService), selectionService(selectionService), notificationService(notificationService), menuService(menuService), feedbackService(feedbackService), publishMenuService(publishMenuService), discardMenuItemService(discardMenuItemService), userProfile(userProfile)
 {
 }
-std::vector<std::string> ChefController::getRecommededMenu(std::string mealType)
+std::vector<ItemReview> ChefController::getRecommendedMenu(std::string mealType)
 {
-  
-    std::vector<std::string> topFoodItems = recommendationService->recommendTopFoodItems (mealType);
-   
+    std::unordered_map<std::string, std::vector<Feedback>> feedbackMap = feedbackService->itemFeedbacks();
+    std::vector<MenuItem> menuItems = menuService->getMenuItem();
+    std::vector<ItemReview> topFoodItems = recommendationService->recommendTopFoodItems(mealType, feedbackMap, menuItems);
+
     return topFoodItems;
 }
 
-std::vector<std::string> ChefController::handleRequest(std::pair<Operation, std::vector<std::string>> request)
+std::string ChefController::handleRequest(std::pair<Operation, std::string> request)
 {
-    std::vector<std::string> response;
+    std::string response;
     switch (request.first)
     {
-    case GetRecommandationFromEngine:
+    case getRecommandationFromEngine:
     {
         std::cout << "GetRecommandationFromEngine" << std::endl;
         response = showRecommendations(request.second);
         break;
     }
-    case SelectMenuForNextDay:
+    case selectMenuForNextDay:
     {
         std::cout << "SelectMenuForNextDay" << std::endl;
         response = getSelectedMenu(request.second);
         break;
     }
-    case GetVoteCountList:
+    case getVoteCountList:
     {
-        response = getVotedItemsList();
+        response = getVotedItemsList(request.second);
         break;
     }
     case PublishMenuForToday:
@@ -50,73 +56,67 @@ std::vector<std::string> ChefController::handleRequest(std::pair<Operation, std:
     }
     case getHomeReceipe:
     {
-        response = getFeedbackOnHomeReceipe(request.second);
+        response = getFeedbackOrHomeReceipe(request.second);
         break;
-    }    
+    }
         return response;
     }
-
 }
 
-std::vector<std::string> ChefController::showRecommendations(std::vector<std::string> mealType)
+std::string ChefController::showRecommendations(std::string mealType)
 {
-    std::vector<std::string> menu = getRecommededMenu(mealType[1]);
-    for (int i = 0; i < menu.size(); i++)
-    {
-        std::cout << menu[i] << " ";
-    }
-    std::cout << std::endl;
-    return menu;
+    std::vector<ItemReview> menu = getRecommendedMenu(mealType);
+    std::string menuListCommaSeprated = RequestSerializer::serializeItemReview(menu);
+    return menuListCommaSeprated;
 }
 
-std::vector<std::string> ChefController::getSelectedMenu(std::vector<std::string> selectedItems)
+std::string ChefController::getSelectedMenu(std::string userResponse)
 {
-    std::vector<std::string> ItemsIdList;
+    std::vector<std::string> selectedItems = StringSerializer::deserialize(userResponse);
     std::cout << selectedItems[0] << " " << selectedItems[1] << std::endl;
-    for (int i = 1; i < selectedItems.size(); i++)
-    {
-        std::cout << selectedItems[i] << " " << std::endl;
-        ItemsIdList.push_back(menuService->getMenuItemIdFromName(selectedItems[i]));
-    }
-    selectionService->addSelectedItems(ItemsIdList);
+    selectionService->addSelectedItems(selectedItems);
     std::cout << "Selection list filled" << std::endl;
-    std::string notificationMessage = "Please vote for the item you would like to have";
-    notificationService->sendNewNotification(3, "Select menu");
+    std::string avtivity = "selected items for" + selectedItems[0];
+    userActivityService->saveUserActivity(userProfile.userId, avtivity);
+    std::string notificationMessage = "Please vote for the item you would like to have as " + selectedItems[0];
+    notificationService->sendNewNotification(notificationMessage);
     std::string success = "got the selected menu";
     std::cout << success << std::endl;
-    std::vector<std::string> response = {success};
-    return response;
+    return success;
 }
 
-std::vector<std::string> ChefController::publishTodaysMenu(std::vector<std::string> finalizedmenu)
+std::string ChefController::publishTodaysMenu(std::string finalizedmenu)
 {
-    std::vector<std::string> itemsNameList;
-    for (int i = 1; i < finalizedmenu.size(); i++)
+    std::vector<std::string> itemsNameList = StringSerializer::deserialize(finalizedmenu);
+    publishMenuService->addPublishedMenu(itemsNameList);
+}
+
+std::string ChefController::getVotedItemsList(std::string mealType)
+{
+    std::vector<VoteCount> itemsList = selectionService->getVotedItemsList(mealType);
+    std::string itemsListCommaSeprated = RequestSerializer::serializeVoteCount(itemsList);
+    return itemsListCommaSeprated;
+}
+
+std::string ChefController::getDiscardedMenuItemsList()
+{
+    std::unordered_map<std::string, std::vector<Feedback>> feedbackMap = feedbackService->itemFeedbacks();
+    std::vector<MenuItem> menuItems = menuService->getMenuItem();
+    std::vector<ItemReview> item = recommendationService->generateDiscardList(feedbackMap, menuItems);
+    for (int i = 0; i < item.size(); i++)
     {
-        std::cout << finalizedmenu[i] << std::endl;
-        itemsNameList.push_back(menuService->getMenuItemIdFromName(finalizedmenu[i]));
+        std::string sentiments = StringSerializer::serialize(item[i].sentiments);
+        discardMenuItemService->addDiscardedItem(item[i].itemName, std::to_string(item[i].averageRating),sentiments);
     }
-    selectionService->addPublishedMenu(itemsNameList);
-    return itemsNameList;
+
+    std::string discardedItems = RequestSerializer::serializeItemReview(item);
+    return discardedItems;
 }
 
-std::vector<std::string> ChefController::getVotedItemsList()
+std::string ChefController::getFeedbackOrHomeReceipe(std::string itemName)
 {
-    std::vector<std::string> itemsList = selectionService->getVotedItemsList();
-    return itemsList;
-}
-
-std::vector<std::string> ChefController::getDiscardedMenuItemsList()
-{
-     return recommendationService->generateDiscardList();
-}
-
-std::vector<std::string> ChefController::getFeedbackOnHomeReceipe(std::vector<std::string> itemName)
-{
-    std::string notificationMessage = "Please vote for the item you would like to have";
-    notificationService->sendNewNotification(4, "Give feedback on discarded item");
+    notificationService->sendNewNotification("Give feedback on discarded item" + itemName);
     std::string success = "added feedback on home receipe";
     std::cout << success << std::endl;
-    std::vector<std::string> response = {success};
-    return response;
+    return success;
 }

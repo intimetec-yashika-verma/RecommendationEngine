@@ -5,5 +5,5 @@
 class IUserController
 {
 public:
-    virtual std::vector<std::string> handleRequest(std::pair<Operation, std::vector<std::string>> userRequest) = 0;
+    virtual std::string handleRequest(std::pair<Operation, std::string> userRequest) = 0;
 };

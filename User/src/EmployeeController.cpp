@@ -1,39 +1,45 @@
+#include <vector>
+#include <iostream>
 #include "EmployeeController.h"
 #include "NotificationService.h"
 #include "SelectionService.h"
 #include "FeedbackService.h"
 #include "Server.h"
-#include <vector>
-#include <iostream>
+#include "UserProfile.h"
+#include "StringSerializer.h"
+#include "RecommendationService.h"
+#include "RequestSerializer.h"
+#include "DiscardedItemReview.h"
 
-EmployeeController::EmployeeController(NotificationService *notificationService, SelectionService *selectionService, FeedbackService *feedbackService,std::string userId) : notificationService(notificationService), selectionService(selectionService), feedbackService(feedbackService),userId(userId)
+
+EmployeeController::EmployeeController(NotificationService *notificationService, SelectionService *selectionService, FeedbackService *feedbackService,RecommendationService *recommendationService,MenuService *menuService,PublishMenuService *publishMenuService,DiscardMenuItemService *discardMenuItemService, UserProfile userProfile) : notificationService(notificationService), selectionService(selectionService), feedbackService(feedbackService),recommendationService(recommendationService),menuService(menuService),publishMenuService(publishMenuService), discardMenuItemService(discardMenuItemService), userProfile(userProfile)
 {
 }
 
-std::vector<std::string> EmployeeController::handleRequest(std::pair<Operation, std::vector<std::string>> request)
+std::string EmployeeController::handleRequest(std::pair<Operation, std::string> request)
 {
-    std::vector<std::string> response;
+    std::string response;
     switch (request.first)
     {
-    case ViewNotification:
+    case viewNotification:
     {
         std::cout << "ViewNotification" << std::endl;
         response = showNotifications();
         break;
     }
-    case VoteItemFromTomorrowMenu:
+    case voteItemFromTomorrowMenu:
     {
         std::cout << "VoteItemFromTomorrowMenu" << std::endl;
-        response = voteForTomorrowMenu();
+        response = voteForTomorrowMenu(request.second);
         break;
     }
-    case SaveVotingResponse:
+    case saveVotingResponse:
     {
         std::cout << "SaveVotingResponse" << std::endl;
-        response = getVottedItems(request.second);
+        response = getVotedItems(request.second);
         break;
     }
-    case ProvideFeedback:
+    case provideFeedback:
     {
         std::cout << "ProvideFeedback" << std::endl;
         response = getItemsListForFeedback();
@@ -45,47 +51,79 @@ std::vector<std::string> EmployeeController::handleRequest(std::pair<Operation, 
         response = getUserFeedback(request.second);
         break;
     }
+    case getDiscardedMenuItemsList:
+    {
+        std::cout << "GetDiscardedItems" << std::endl;
+        response = getDiscardedMenuItems();
+        break;
+    }
+    case Operation::getFeedbackOnDiscardedItem:
+    {
+        std::cout << "GetFeedbackOnDiscardedItem" << std::endl;
+        response = getFeedbackOnDiscardedItem(request.second);
+        break;
     }
     return response;
 }
+}
 
-std::vector<std::string> EmployeeController::showNotifications()
+std::string EmployeeController::showNotifications()
 {
-    std::vector<std::string> notifications = notificationService->getAllNotifications(userId);
+    std::vector<std::string> notifications = notificationService->getAllNotifications(userProfile.userId);
     for(int i=0;i<notifications.size();i++)
     {
         std::cout<<notifications[i]<<std::endl;
     }
-    return notifications;
+    std::string notificationsCommaSeprated = StringSerializer::serialize(notifications);
+    return notificationsCommaSeprated;
 }
 
-std::vector<std::string> EmployeeController::voteForTomorrowMenu()
+std::string EmployeeController::voteForTomorrowMenu(std::string mealType)
 {
-    std::vector<MenuItem> menuItems = selectionService->getListOfItemsToVote();
-     
-    return menuItems;
+    std::vector<MenuItem> selectedItemsList = selectionService->getListOfItemsToVoteForMealType(mealType);
+    std::vector<MenuItem> menuItemsList = menuService->getMenuItem();
+    std::vector<MenuItem> itemReview  =  recommendationService->sortRecommendedMenuItemsBasedOnProfile(userProfile,selectedItemsList,menuItemsList);
+    std::string itemReviewCommaSeprated = RequestSerializer::serializeMenuItems(itemReview);
+    return itemReviewCommaSeprated;
 }
 
-std::vector<std::string> EmployeeController::getVottedItems(std::vector<std::string> itemsList)
+std::string EmployeeController::getVotedItems(std::string itemsList)
 {
-    std::vector<std::string> subVector(itemsList.begin() + 1, itemsList.end());
-    selectionService->saveVotes(subVector);
-    return subVector;
+    std::vector<std::string> votedItems = StringSerializer::deserialize(itemsList);
+    selectionService->saveVotes(votedItems);
+    return "";
 }
 
-std::vector<std::string> EmployeeController::getItemsListForFeedback()
+std::string EmployeeController::getItemsListForFeedback()
 {
-    std::vector<std::string> itemsList = selectionService->getPublishedMenu();
-    return itemsList;
+    std::vector<std::string> itemsList = publishMenuService->getPublishedMenu();
+    std::string itemsListCommaSeprated = StringSerializer::serialize(itemsList);
+    return itemsListCommaSeprated;
 }
 
-std::vector<std::string> EmployeeController::getUserFeedback(std::vector<std::string> response)
+std::string EmployeeController::getUserFeedback(std::string response)
 {
+    std::unordered_map<std::string,Feedback> feedback = RequestSerializer::deserializeFeedbacks(response);
     for(int i=0;i<response.size();i++)
     {
         std::cout<<response[i]<<std::endl;
     }
-     feedbackService->addItemFeedback(response);
+
+     feedbackService->addItemFeedback(userProfile.userId,feedback);
      return response;
+}
+
+std::string EmployeeController::getDiscardedMenuItems()
+{
+    std::vector<ItemReview> discardedItems = discardMenuItemService->getDiscardedItems();
+    std::string discardedItemsCommaSeprated = RequestSerializer::serializeItemReview(discardedItems);
+    return discardedItemsCommaSeprated;
+}
+
+std::string EmployeeController::getFeedbackOnDiscardedItem(std::string feedback)
+{
+    DiscardedItemReview itemReview = RequestSerializer::deserializeDiscardedItemReview(feedback);
+    feedbackService->addFeedbackOnDiscaredItem(userProfile.userId,itemReview.itemName,itemReview.negativePointOnItem,itemReview.improvementPointOnItem,itemReview.homeRecepie);
+    return "feedback";
 }
 

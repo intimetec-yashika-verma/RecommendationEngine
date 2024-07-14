@@ -9,7 +9,7 @@ MenuDAO::MenuDAO() : dbConnection{DatabaseConnection::getInstance()}
 
 void MenuDAO::addNewItem(std::string userId, std::string name, std::string availablity, std::string price, std::string mealType,std::string dietaryCategory, std::string spiceLevel, std::string cuisineCategory, std::string sweet)
 {
-    std::string query = "CALL AddMenuItem('" + userId + "','" + name + "','" + price + "','" + availablity + "','" + mealType + "','" + dietaryCategory + "','" + spiceLevel + "','" + cuisineCategory + "','" + sweet + "')";
+    std::string query = "INSERT INTO MenuItem (name, isAvailable, price, mealType, dietaryCategory, spiceLevel, cuisineCategory, isSweet) VALUES ('" + name + "', '" + availablity + "', '" + price + "', '" + mealType + "', '" + dietaryCategory + "', '" + spiceLevel + "', '" + cuisineCategory + "', '" + sweet + "')";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
@@ -21,35 +21,16 @@ void MenuDAO::addNewItem(std::string userId, std::string name, std::string avail
 }
 void MenuDAO::updateMenuItem(std::string userId,std::string name, std::string propertyName, std::string updatedValue)
 {
-    std::string query = "UPDATE MenuItems SET " + propertyName + " = '" + updatedValue + "' WHERE name = '" + name + "'";
+    std::string query = "UPDATE MenuItem SET " + propertyName + " = '" + updatedValue + "' WHERE name = '" + name + "'";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
     }
     else
     {
-        std::string query1 = "INSERT INTO UserActivity (userId, activity) VALUES ("+ userId +",CONCAT('Updated '"+propertyName+" of "+name+"to "+updatedValue+")";
-        mysql_query(connection, query1.c_str());
-        
-        std::string query3 = "INSERT INTO Notification (message) VALUES (CONCAT('Updated '"+propertyName+" of "+name+"to "+updatedValue+")";
-        mysql_query(connection, query3.c_str());
-        std::string query2 = "SELECT LAST_INSERT_ID() AS notification_id";
-        mysql_query(connection, query2.c_str());
-        MYSQL_RES *result = mysql_store_result(connection);
-         MYSQL_ROW row;
-         std::string notificationId;
-        while (row = mysql_fetch_row(result))
-        {
-            notificationId = row[0];
-        }
-        std::string query4 = "INSERT INTO NotificationSeenStatus (user_id, notification_id) SELECT id,"+notificationId +"FROM User  WHERE Role = 'Employee'";
-        if (mysql_query(connection, query4.c_str()))
-       {
-        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-        }
+       
         std::cout << "Query executed successfully." << std::endl;
-
-    }
+}
 }
 
 void MenuDAO::removeMenuItem(std::string userId,std::string name)
@@ -57,8 +38,7 @@ void MenuDAO::removeMenuItem(std::string userId,std::string name)
     std::string query ="CALL DeleteMenuItemAndNotify('"+name+"','"+userId+"')";
     mysql_query(connection, query.c_str());
 }
-
-std::vector<MenuItem> MenuDAO::fetchMenuItems(std::string userId)
+ std::vector<MenuItem> MenuDAO::fetchMenuItems()
 {
     std::vector<MenuItem> menuItems;
     std::string query = "SELECT * FROM MenuItems";
@@ -90,9 +70,6 @@ std::vector<MenuItem> MenuDAO::fetchMenuItems(std::string userId)
         menuItems.push_back(item);
     }
     mysql_free_result(result);
-    
-        std::string query1 = "INSERT INTO UserActivity (userId, activity) VALUES ("+ userId +",CONCAT('View Menu Items')";
-        mysql_query(connection, query1.c_str());
     return menuItems;
 }
 
@@ -166,7 +143,7 @@ std::string MenuDAO::getIdFromName(std::string name)
 std::vector<std::string> MenuDAO::getMenuItemsForMealType(std::string mealType)
 {
     std::vector<std::string> itemsList ;
-    std::string query = "SELECT id FROM MenuItems WHERE mealType = '" + mealType + "'";
+    std::string query = "SELECT id FROM MenuItem WHERE mealType = '" + mealType + "'";
     mysql_query(connection, query.c_str());
     MYSQL_RES *result = mysql_store_result(connection);
     MYSQL_ROW row;

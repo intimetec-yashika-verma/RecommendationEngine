@@ -8,11 +8,12 @@ class FeedbackService
 {
 public:
     FeedbackService(FeedbackDAO *feedbackDAO);
-    std::unordered_map<std::string, Feedback> itemFeedbacks;
+    std::unordered_map<std::string, std::vector<Feedback>> itemFeedbacks();
 
     Feedback *getItemFeedback(const std::string &ItemId);
 
-    void addItemFeedback(std::vector<std::string> itemList);
+    void addItemFeedback(std::string userId,std::unordered_map<std::string,Feedback> itemList);
+    void addFeedbackOnDiscaredItem(std::string userId,std::string itemName,std::string negativePoint,std::string improvement,std::string homeReceipe);
 
 private:
     FeedbackDAO *feedbackDAO;

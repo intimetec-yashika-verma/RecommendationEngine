@@ -12,6 +12,7 @@ public:
     void showDeleteItemPrompt();
     void showMenu();
     std::string getDataToUpdate(std::string itemName);
+    void logout();
 
 private:
     Client *client;

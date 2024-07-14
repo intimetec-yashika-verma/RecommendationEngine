@@ -5,7 +5,7 @@ struct UserProfile {
     std::string role;
     std::string dietaryCategory;
     std::string spiceLevel;
-    std::string PreferanceType;
-    std::string SweetTooth;
+    std::string preferanceType;
+    std::string sweetTooth;
 
 };

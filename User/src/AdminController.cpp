@@ -14,22 +14,22 @@ std::string AdminController::handleRequest(std::pair<Operation, std::string> req
     std::string response;
     switch (request.first)
     {
-    case AddMenuItem:
+    case Operation::addMenuItem:
         std::cout << "addMenuItem" << std::endl;
         response = addMenuItem(request.second);
         break;
 
-    case UpdateMenuItem:
+    case Operation::updateMenuItem:
         std::cout << "UpdateMenuItem" << std::endl;
         response = updateMenuItem(request.second);
         break;
 
-    case DeleteMenuItem:
+    case Operation::deleteMenuItem:
         std::cout << "DeleteMenuItem" << std::endl;
         response = deleteItemFromMenu(request.second);
         break;
 
-    case ViewMenu:
+    case Operation::viewMenu:
         std::cout << "ViewMenuItems" << std::endl;
         response = viewMenuItems();
     }
@@ -39,8 +39,8 @@ std::string AdminController::handleRequest(std::pair<Operation, std::string> req
 
 std::string AdminController::addMenuItem(std::string adminChoice)
 {
-    MenuItem itemData;
-    itemData.deserialize(adminChoice);
+    std::cout<<"Data to add "<<adminChoice<<std::endl;
+    MenuItem itemData = RequestSerializer::deserializeMenuItem(adminChoice);
     std::cout << "item Data" << itemData.itemName << itemData.price << itemData.availability << itemData.mealType << std::endl;
     menuService->addItem(userProfile.userId, itemData.itemName, itemData.availability, itemData.price, itemData.mealType, itemData.dietaryCategory, itemData.spiceLevel, itemData.cuisineCategory, itemData.sweet);
     std::string success = "item added successfully";
@@ -49,11 +49,8 @@ std::string AdminController::addMenuItem(std::string adminChoice)
 
 std::string AdminController::updateMenuItem(std::string adminChoice)
 {
-    for (int i = 0; i < adminChoice.size(); i++)
-    {
-        std::cout << adminChoice[i] << " ,";
-    }
-    MenuItem itemData;
+
+    MenuItem itemData = RequestSerializer::deserializeMenuItem(adminChoice);
     std::cout << itemData.itemName + itemData.price + itemData.availability + itemData.mealType << std::endl;
     menuService->updateItem(userProfile.userId, itemData.itemName, itemData.price, itemData.availability, itemData.mealType, itemData.dietaryCategory, itemData.spiceLevel, itemData.cuisineCategory, itemData.sweet);
     std::string success = "item updated successfully";
@@ -71,7 +68,7 @@ std::string AdminController::deleteItemFromMenu(std::string adminChoice)
 
 std::string AdminController::viewMenuItems()
 {
-    std::vector<MenuItem> menu = menuService->getMenuItem(userProfile.userId);
-    std::vector<std::string> menuList = RequestSerializer::serializeMenuItemToString(menu);
+    std::vector<MenuItem> menu = menuService->getMenuItem();
+    std::string menuList = RequestSerializer::serializeMenuItems(menu);
     return menuList;
 }

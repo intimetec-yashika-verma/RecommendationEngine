@@ -7,7 +7,7 @@ class NotificationDAO
 {
 public:
 NotificationDAO();
-    void addNewNotification(std::string genratedId, std::string notificationType, std::string notificationMessage);
+    void addNewNotification(std::string notificationMessage);
     std::string getLastUserId();
     std::vector<std::string> getUserNotifcations(std::string userId);
 

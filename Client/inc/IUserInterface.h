@@ -1,4 +1,4 @@
-#include "User.h"
+#pragma once
 class IUserInterface
 {
 public:

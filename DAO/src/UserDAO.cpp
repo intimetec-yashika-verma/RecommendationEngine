@@ -8,7 +8,7 @@ UserDAO::UserDAO() : dbConnection{DatabaseConnection::getInstance()}
 }
 UserProfile UserDAO::getUserData(std::string email, std::string password)
 {
-    std::string query = "SELECT * FROM users WHERE email = '" + email + "' AND password = '" + password + "'";
+    std::string query = "SELECT * FROM User WHERE emailId = '" + email + "' AND password = '" + password + "'";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
@@ -23,11 +23,11 @@ UserProfile UserDAO::getUserData(std::string email, std::string password)
     UserProfile userProfile;
     MYSQL_ROW   row = mysql_fetch_row(result);
     userProfile.userId = row[0];
-    userProfile.role = row[3];
-    userProfile.dietaryCategory = row[4];
-    userProfile.spiceLevel = row[5];
-    userProfile.PreferanceType = row[6];
-    userProfile.SweetTooth = row[7];
+    userProfile.role = row[7];
+    userProfile.dietaryCategory = row[3];
+    userProfile.spiceLevel = row[4];
+    userProfile.preferanceType = row[5];
+    userProfile.sweetTooth = row[6];
     mysql_free_result(result);
 
     return userProfile;

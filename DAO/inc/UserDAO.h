@@ -1,6 +1,6 @@
 #pragma once
 #include "DatabaseConnection.h"
-#include "User.h"
+#include "UserProfile.h"
 class UserDAO
 {
     public:

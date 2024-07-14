@@ -13,6 +13,7 @@ UserProfile UserService::authenticateUser(std::string email, std::string passwor
     std::cout<<"authenticateUser"<<std::endl;
     UserProfile userProfile = userDAO->getUserData(email, password);
     saveUserActivity(userProfile.userId, "Login");
+    std::cout<<"User Id: "<<userProfile.userId<<std::endl;
     return userProfile;
 }
 

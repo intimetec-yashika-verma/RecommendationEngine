@@ -4,7 +4,7 @@
 DatabaseConnection* DatabaseConnection::instance = nullptr;
 
 DatabaseConnection::DatabaseConnection()
-    : host("localhost"), user("root"), password("Abc123@@"), database("RecommedationEngine") {
+    : host("localhost"), user("root"), password("Abc123@@"), database("RecommendationEngine") {
     connection = mysql_init(nullptr);
     if (connection == nullptr) {
         throw std::runtime_error("MySQL initialization failed");

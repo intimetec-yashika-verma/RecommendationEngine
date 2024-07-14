@@ -2,22 +2,24 @@
 #include "StringSerializer.h"
 #include "RequestProcessor.h"
 
-
 ClientHandler::ClientHandler(int clientSocket)
-    : clientSocket(clientSocket), running(true) {
+    : clientSocket(clientSocket), running(true)
+{
+}
 
-    }
-
-void ClientHandler::handle() {
-    while (running) {
+void ClientHandler::handle()
+{
+    while (running)
+    {
         std::string dataReceived = receiveRequest();
-        if (dataReceived.size()==0) {
+        if (dataReceived.size() == 0)
+        {
             continue; // Continue to listen for further data
         }
-        
-        std::string response = requestProcessor.processRequest(dataReceived);
 
-        if (!sendRequest(response)) {
+        std::string response = requestProcessor.processRequest(dataReceived);
+        if (!sendRequest(response))
+        {
             std::cerr << "Failed to send response" << std::endl;
             break;
         }
@@ -27,7 +29,8 @@ void ClientHandler::handle() {
     close(clientSocket);
 }
 
-bool ClientHandler::sendRequest(std::string response) {
+bool ClientHandler::sendRequest(std::string response)
+{
     // std::cout<<messageToSent<<std::endl;
     ssize_t bytesSent = send(clientSocket, response.c_str(), strlen(response.c_str()), 0);
     if (bytesSent == -1)
@@ -41,8 +44,9 @@ bool ClientHandler::sendRequest(std::string response) {
     return true;
 }
 
-std::string ClientHandler::receiveRequest() {
-     char buffer[1024];
+std::string ClientHandler::receiveRequest()
+{
+    char buffer[1024];
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
     if (bytesRead == -1)
     {
@@ -58,7 +62,7 @@ std::string ClientHandler::receiveRequest() {
         std::cout << "Client: " << buffer << std::endl;
     }
     std::string str(buffer);
-    std::cout<<"stirng response "<<str<<std::endl;  
+    std::cout << "stirng response " << str << std::endl;
 
     return str;
 }

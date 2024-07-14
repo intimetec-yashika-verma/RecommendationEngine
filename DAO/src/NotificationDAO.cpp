@@ -15,9 +15,9 @@ std::string NotificationDAO::getLastUserId()
     MYSQL_ROW row = mysql_fetch_row(result);
     return row[0];
 }
-void NotificationDAO::addNewNotification(std::string generatedId, std::string notificationType, std::string notificationMessage)
+void NotificationDAO::addNewNotification(std::string notificationMessage)
 {
-    std::string query = "INSERT INTO Notification (id,type,message) VALUES ('" + generatedId + "','" + notificationType + "','" + notificationMessage + "')";
+    std::string query = "CALL AddNotification('"+notificationMessage+"')";
     if (mysql_query(connection, query.c_str())) {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
     } else {
