@@ -5,10 +5,11 @@
 
 class NotificationService
 {
-    public:
+public:
     NotificationService(NotificationDAO *notificationDAO);
-    void sendNewNotification(std::string message); 
+    void sendNewNotification(std::string message);
     std::vector<std::string> getAllNotifications(std::string userId);
-    private:
+
+private:
     NotificationDAO *notificationDAO;
 };

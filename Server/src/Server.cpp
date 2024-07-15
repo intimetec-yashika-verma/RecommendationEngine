@@ -1,7 +1,8 @@
 #include "Server.h"
 #include <thread>
+#include <mutex>
 #include "ClientHandler.h"
-#include "StringSerializer.h"
+
 #include "DatabaseConnection.h"
 
 Server::Server(int port) : port(port)
@@ -45,7 +46,6 @@ Server::~Server()
 
 void Server::startListening()
 {
-    // Accept incoming connections
 
     while (true)
     {
@@ -58,50 +58,23 @@ void Server::startListening()
             continue;
         }
 
-        // Create a thread to handle this client
-        
         std::thread clientThread(&ClientHandler::handle, ClientHandler(clientSocket));
         clientThreads.push_back(std::move(clientThread));
+        clientSockets.push_back(clientSocket);
     }
 }
 
-std::vector<std::string> Server::receiveMessage()
+void Server::stop()
 {
 
-    char buffer[1024];
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-    if (bytesRead == -1)
+    for (int clientSocket : clientSockets)
     {
-        std::cerr << "Receive failed. Error: " << strerror(errno) << std::endl;
+        send(clientSocket, "exit", strlen("exit"), 0);
+        close(clientSocket);
     }
-    else if (bytesRead == 0)
-    {
-        std::cerr << "Connection closed by client." << std::endl;
-    }
-    else
-    {
-        buffer[bytesRead] = '\0';
-        std::cout << "Client: " << buffer << std::endl;
-    }
-    std::string str(buffer);
-    StringSerializer stringSerializer = StringSerializer();
-    std::vector<std::string> receivedVector = stringSerializer.deserialize(str);
-    return receivedVector;
-}
 
-bool Server::sendMessage(std::vector<std::string> message)
-{
-    StringSerializer stringSerializer = StringSerializer();
-    std::string messageToSent = stringSerializer.serialize(message);
-    // std::cout<<messageToSent<<std::endl;
-    ssize_t bytesSent = send(clientSocket, messageToSent.c_str(), strlen(messageToSent.c_str()), 0);
-    if (bytesSent == -1)
-    {
-        std::cerr << "Send failed. Error: " << strerror(errno) << std::endl;
-    }
-    else
-    {
-        std::cout << "Message sent to client." << std::endl;
-    }
-}
+    clientSockets.clear();
+    clientThreads.clear();
 
+    std::cout << "Server stopped" << std::endl;
+}

@@ -1,6 +1,7 @@
 
 #include "IUserInterface.h"
 #include "Client.h"
+#include "Helper.h"
 class ChefInterface : public IUserInterface
 {
 public:
@@ -14,5 +15,6 @@ public:
     void logout();
 
 private:
+    Helper *helper;
     Client *client;
 };

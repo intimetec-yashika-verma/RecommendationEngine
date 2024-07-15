@@ -5,21 +5,19 @@
 #include "Role.h"
 #include "IUserController.h"
 #include "UserProfile.h"
-class RequestProcessor {
-    private :
-    // AuthenticationController* authenticationController;
-    // IUserController* userController;
-    // MenuItemService* menuItemService;
-    // UserService* userService;
-    // FeedbackService* feedbackService;
-    // NextDayMenuVotingService* nextDayMenuVotingService;
-    // RecommendationService* RecommendationService;
+#include "Helper.h"
+class RequestProcessor
+{
+private:
+    void adminLogin();
+    void chefLogin();
+    void employeeLogin();
 
 public:
-    IUserController* userController;
+    IUserController *userController;
     RequestProcessor();
     std::string processRequest(std::string request);
     bool isUserLoggedIn = false;
     UserProfile userProfile;
+    Helper *helper;
 };
-

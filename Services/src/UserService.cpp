@@ -5,19 +5,19 @@
 #include <iostream>
 #include <vector>
 
-UserService::UserService(UserDAO *userDao,UserActivityDAO *userActivityDAO) : userDAO(userDao),userActivityDAO(userActivityDAO)
+UserService::UserService(UserDAO *userDao) : userDAO(userDao)
 {
 }
 UserProfile UserService::authenticateUser(std::string email, std::string password)
 {
-    std::cout<<"authenticateUser"<<std::endl;
     UserProfile userProfile = userDAO->getUserData(email, password);
-    saveUserActivity(userProfile.userId, "Login");
-    std::cout<<"User Id: "<<userProfile.userId<<std::endl;
-    return userProfile;
-}
-
-void UserService::saveUserActivity(std::string userId, std::string activity)
-{
-    userActivityDAO->saveUserActivity(userId, activity);
+    if (userProfile.userId == "")
+    {
+        userProfile.role = "-1";
+        return userProfile;
+    }
+    else
+    {
+        return userProfile;
+    }
 }

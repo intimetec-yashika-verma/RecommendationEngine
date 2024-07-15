@@ -1,36 +1,36 @@
 #include "NotificationDAO.h"
 #include "DatabaseConnection.h"
-#include "StringSerializer.h"
+
 #include <iostream>
 #include <string>
 NotificationDAO::NotificationDAO() : dbConnection{DatabaseConnection::getInstance()}
 {
     connection = dbConnection->getConnection();
 }
-std::string NotificationDAO::getLastUserId()
-{
-    std::string lastUserId = "user000";
-    mysql_query(connection, "SELECT id FROM Notification ORDER BY id DESC LIMIT 1");
-    MYSQL_RES *result = mysql_store_result(connection);
-    MYSQL_ROW row = mysql_fetch_row(result);
-    return row[0];
-}
 void NotificationDAO::addNewNotification(std::string notificationMessage)
 {
-    std::string query = "CALL AddNotification('"+notificationMessage+"')";
-    if (mysql_query(connection, query.c_str())) {
+    std::string query = "CALL AddNotificationAndUpdateSeenStatus('" + notificationMessage + "')";
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+        throw std::runtime_error("Error in adding notification: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
 }
 
 std::vector<std::string> NotificationDAO::getUserNotifcations(std::string userId)
 {
-     std::string query = "SELECT n.id, n.type, n.message FROM Notification n JOIN NotificationSeenStatus nss ON n.id = nss.notification_id WHERE nss.user_id = '"+userId+"' AND nss.seen = FALSE";
-    if (mysql_query(connection, query.c_str())) {
+    std::string query = "SELECT n.notification_id, n.message FROM Notification n JOIN NotificationSeenStatus nss ON n.notification_id = nss.notification_id WHERE nss.user_id = '" + userId + "' AND nss.seen = FALSE";
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+        throw std::runtime_error("Error in fetching notifications: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
     MYSQL_RES *result = mysql_store_result(connection);
@@ -43,10 +43,21 @@ std::vector<std::string> NotificationDAO::getUserNotifcations(std::string userId
     while ((row = mysql_fetch_row(result)))
     {
         notifications.push_back(row[1]);
-         notifications.push_back(row[2]);
-         std::cout<<row[1]<<" "<<row[2]<<std::endl;
+        notifications.push_back(row[2]);
     }
-    std::cout<<notifications.size()<<std::endl;
     mysql_free_result(result);
     return notifications;
+}
+void NotificationDAO::setSeenStatus(std::string userId)
+{
+    std::string updateQuery = "UPDATE NotificationSeenStatus SET seen = TRUE WHERE user_id = '" + userId + "'";
+    if (mysql_query(connection, updateQuery.c_str()))
+    {
+        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
+        throw std::runtime_error("Error in updating seen status: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
+        std::cout << "Seen status updated successfully." << std::endl;
+    }
 }

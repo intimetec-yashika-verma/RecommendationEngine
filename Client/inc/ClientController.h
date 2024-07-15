@@ -1,3 +1,4 @@
+#pragma once
 #include "Client.h"
 #include "Role.h"
 #include "IUserInterface.h"

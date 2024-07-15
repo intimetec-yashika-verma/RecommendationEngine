@@ -1,5 +1,5 @@
 #include "ClientHandler.h"
-#include "StringSerializer.h"
+
 #include "RequestProcessor.h"
 
 ClientHandler::ClientHandler(int clientSocket)
@@ -14,7 +14,12 @@ void ClientHandler::handle()
         std::string dataReceived = receiveRequest();
         if (dataReceived.size() == 0)
         {
-            continue; // Continue to listen for further data
+            continue;
+        }
+        if (dataReceived == "exit")
+        {
+            running = false;
+            break;
         }
 
         std::string response = requestProcessor.processRequest(dataReceived);
@@ -24,14 +29,11 @@ void ClientHandler::handle()
             break;
         }
     }
-
-    // Closing the socket
     close(clientSocket);
 }
 
 bool ClientHandler::sendRequest(std::string response)
 {
-    // std::cout<<messageToSent<<std::endl;
     ssize_t bytesSent = send(clientSocket, response.c_str(), strlen(response.c_str()), 0);
     if (bytesSent == -1)
     {

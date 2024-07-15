@@ -2,27 +2,36 @@
 #include "DatabaseConnection.h"
 #include "MenuItem.h"
 #include "VoteCount.h"
+#include "ItemReview.h"
 
-
-SelectedItemsDAO::SelectedItemsDAO(): dbConnection{DatabaseConnection::getInstance()}
+SelectedItemsDAO::SelectedItemsDAO() : dbConnection{DatabaseConnection::getInstance()}
 {
-    connection=dbConnection->getConnection();
+    connection = dbConnection->getConnection();
+    helper = new Helper();
 }
-void SelectedItemsDAO::addSlectedItems(std::string itemName)
+void SelectedItemsDAO::addSlectedItems(std::string itemName, std::string rating, std::string comment)
 {
-    std::string query = "INSERT INTO ChefSelectedItem (name) VALUES ('" + itemName + "')";
-    if (mysql_query(connection, query.c_str())) {
+    std::string query = "INSERT INTO ChefSelectedItem (itemName,averageRating,commentSentiments) VALUES ('" + itemName + "'," + rating + ",'" + comment + "')";
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+        throw std::runtime_error("Query failed: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
 }
 std::vector<VoteCount> SelectedItemsDAO::getSelectedItemsAndVotes(std::string mealType)
 {
-    std::string query = "SELECT csi.name, csi.vote_count FROM ChefSelectedItem csi JOIN MenuItem mi ON csi.mealType = mi.mealType WHERE mi.mealType = '"+mealType+ "'";
-   if (mysql_query(connection, query.c_str())) {
+    std::string query = "SELECT csi.itemName, csi.voteCount FROM ChefSelectedItem csi JOIN MenuItem mi ON csi.name = mi.name WHERE mi.mealType = '" + mealType + "'";
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+        throw std::runtime_error("Query failed: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
 
@@ -38,19 +47,22 @@ std::vector<VoteCount> SelectedItemsDAO::getSelectedItemsAndVotes(std::string me
         VoteCount item;
         item.itemName = row[0];
         item.count = std::stoi(row[1]);
-        itemList.push_back(item);     
+        itemList.push_back(item);
     }
-    std::cout << std::endl;
     mysql_free_result(result);
     return itemList;
 }
 
 std::vector<MenuItem> SelectedItemsDAO::getSelectedItems()
 {
-   std::string query = "SELECT mi.name mi.dietaryCategory mi.SpiceLevel mi.cuisineCategory mi.Sweet FROM selectedItem si JOIN MenuItems mi ON si.name = mi.name";
-   if (mysql_query(connection, query.c_str())) {
+    std::string query = "SELECT mi.name mi.dietaryCategory mi.SpiceLevel mi.cuisineCategory mi.Sweet  FROM ChefSelectedItem si JOIN MenuItem mi ON si.name = mi.name WHERE mi.date = '";
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+        throw std::runtime_error("Query failed: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
 
@@ -69,33 +81,43 @@ std::vector<MenuItem> SelectedItemsDAO::getSelectedItems()
         item.spiceLevel = row[2];
         item.cuisineCategory = row[3];
         item.sweet = row[4];
-        itemList.push_back(item);    
+        itemList.push_back(item);
     }
-    // for (std::string num : itemList) {
-    //     std::cout << num << " ";
-    // }
-    // std::cout << std::endl;
     mysql_free_result(result);
     return itemList;
 }
 
 void SelectedItemsDAO::saveUserVotes(std::string itemName)
 {
-  std::string query = "UPDATE ChefSelectedItem SET voteCount = voteCount + 1 WHERE mi.name = '" + itemName + "'";
-   if (mysql_query(connection, query.c_str())) {
+    std::string query = "UPDATE ChefSelectedItem SET voteCount = voteCount + 1 WHERE name = '" + itemName + "'";
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+        throw std::runtime_error("Query failed: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
 }
 
 std::vector<MenuItem> SelectedItemsDAO::getSelectedItemForMealType(std::string mealType)
 {
-     std::string query = "SELECT mi.name,  mi.dietaryCategory,  mi.spiceLevel,  mi.cuisineCategory,  mi.isSweet FROM ChefSelectedItem si JOIN MenuItem mi ON si.name = mi.name WHERE mi.mealType = '"+mealType+"'";
+    time_t t = time(0);
+    struct tm *now = localtime(&t);
+    char date[11];
+    strftime(date, sizeof(date), "%Y-%m-%d", now);
+    std::string dateString = date;
+    std::cout << dateString << std::endl;
+    std::string query = "SELECT mi.name,  mi.dietaryCategory,  mi.spiceLevel,  mi.cuisineCategory,  mi.isSweet FROM ChefSelectedItem si JOIN MenuItem mi ON si.itemName = mi.name WHERE mi.mealType = '" + mealType + "' AND si.createdAt = '" + dateString + "'";
 
-   if (mysql_query(connection, query.c_str())) {
+    if (mysql_query(connection, query.c_str()))
+    {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
-    } else {
+        throw std::runtime_error("Query failed: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
         std::cout << "Query executed successfully." << std::endl;
     }
 
@@ -114,12 +136,40 @@ std::vector<MenuItem> SelectedItemsDAO::getSelectedItemForMealType(std::string m
         item.spiceLevel = row[2];
         item.cuisineCategory = row[3];
         item.sweet = row[4];
-        itemList.push_back(item);    
+        itemList.push_back(item);
     }
-    // for (std::string num : itemList) {
-    //     std::cout << num << " ";
-    // }
-    // std::cout << std::endl;
     mysql_free_result(result);
     return itemList;
+}
+
+std::vector<ItemReview> SelectedItemsDAO::getSelectedItemsReview()
+{
+    std::string query = "SELECT itemName, averageRating,commentSentiments FROM ChefSelectedItem";
+    if (mysql_query(connection, query.c_str()))
+    {
+        std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
+        throw std::runtime_error("Query failed: " + std::string(mysql_error(connection)));
+    }
+    else
+    {
+        std::cout << "Query executed successfully." << std::endl;
+    }
+
+    MYSQL_RES *result = mysql_store_result(connection);
+    if (result == nullptr)
+    {
+        std::cerr << "MySQL store result error: " << mysql_error(connection) << std::endl;
+    }
+    std::vector<ItemReview> reviewList;
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result)))
+    {
+        ItemReview review;
+        review.itemName = row[0];
+        review.averageRating = std::stod(row[1]);
+        review.sentiments = helper->deserialize(row[2]);
+        reviewList.push_back(review);
+    }
+    mysql_free_result(result);
+    return reviewList;
 }

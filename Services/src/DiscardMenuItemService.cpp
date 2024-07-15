@@ -1,6 +1,6 @@
 #include "DiscardMenuItemService.h"
 #include "ItemReview.h"
-DiscardMenuItemService::DiscardMenuItemService(DiscardItemDAO *discardItemDAO):discardItemDAO(discardItemDAO)
+DiscardMenuItemService::DiscardMenuItemService(DiscardItemDAO *discardItemDAO) : discardItemDAO(discardItemDAO)
 {
 }
 
@@ -9,6 +9,7 @@ void DiscardMenuItemService::addDiscardedItem(std::string itemName, std::string 
     discardItemDAO->addDiscardedItem(itemName, rating, comment);
 }
 
-std::vector<ItemReview> DiscardMenuItemService::getDiscardedItems(){
+std::vector<ItemReview> DiscardMenuItemService::getDiscardedItems()
+{
     return discardItemDAO->getDiscardedItems();
 }

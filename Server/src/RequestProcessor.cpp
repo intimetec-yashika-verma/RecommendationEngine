@@ -1,6 +1,6 @@
 #include "RequestProcessor.h"
 #include "Operation.h"
-#include "RequestSerializer.h"
+
 #include "AuthenticationController.h"
 #include <utility>
 #include "UserService.h"
@@ -24,94 +24,117 @@
 #include "DiscardMenuItemService.h"
 RequestProcessor::RequestProcessor()
 {
+    helper = new Helper();
 }
 
 std::string RequestProcessor::processRequest(std::string userResponse)
 {
-    std::cout << "processRequest" << std::endl;
-    std::pair<Operation,std::string> requestData = RequestSerializer::deserializeOperation(userResponse);
-    std::cout << requestData.first << " " << requestData.second << std::endl;
-    std::string response;
-    if (!isUserLoggedIn)
+    try
     {
-        std::cout << "isUserLoggedIn " << isUserLoggedIn << std::endl;
-        UserDAO *userDAO = new UserDAO();
-        UserActivityDAO *userActivityDAO = new UserActivityDAO();
-        UserService *userService = new UserService(userDAO, userActivityDAO);
-        AuthenticationController authenticationController = AuthenticationController(userService);
-        userProfile = authenticationController.authenticateUser(requestData.second);
-        std::cout << "userAuthenticated " << std::endl;
-        isUserLoggedIn = true;
-        response = userProfile.role;
-        std::cout<<response<<std::endl;
-        switch (static_cast<Role>(std::stoi(userProfile.role)))
+        std::pair<Operation, std::string> requestData = helper->deserializeOperation(userResponse);
+        std::string response;
+        if (!isUserLoggedIn)
         {
-        case Role::admin:
-        {
-            std::cout << "Admin LoggedIn" << std::endl;
-            MenuDAO *menuDao = new MenuDAO();
-            MenuService *menuService = new MenuService(menuDao);
-            userController = new AdminController(menuService, userProfile);
-            break;
-        }
-        case Role::chef:
-        {
-            std::cout << "Chef LoggedIn" << std::endl;
-            MenuDAO *menuDao = new MenuDAO();
-            FeedbackDAO *feedbackDao = new FeedbackDAO();
-            PublishedMenuDAO *publishedMenuDAO = new PublishedMenuDAO();
-            PublishMenuService *publishMenuService = new PublishMenuService(publishedMenuDAO);
-            MenuService *menuService = new MenuService(menuDao);
-            SelectedItemsDAO *selectedItemsDAO = new SelectedItemsDAO();
-            RecommendationService *recommendationService = new RecommendationService(menuDao, feedbackDao);
+            UserDAO *userDAO = new UserDAO();
             UserActivityDAO *userActivityDAO = new UserActivityDAO();
-            DiscardItemDAO *discardItemDAO = new DiscardItemDAO();
-            UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
-            SelectionService *selectionService = new SelectionService(selectedItemsDAO);
-            NotificationDAO *notificationDAO = new NotificationDAO();
-            NotificationService *notificationService = new NotificationService(notificationDAO);
-            FeedbackService *feedbackService = new FeedbackService(feedbackDao);
-            DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO);
-            userController = new ChefController(recommendationService, selectionService, notificationService, menuService,feedbackService,publishMenuService,userActivityService,discardMenuItemService,userProfile);
-            break;
+            UserService *userService = new UserService(userDAO);
+            AuthenticationController authenticationController = AuthenticationController(userService);
+            userProfile = authenticationController.authenticateUser(requestData.second);
+            if (userProfile.userId == "")
+            {
+                return userProfile.role;
+            }
+            isUserLoggedIn = true;
+            response = userProfile.role;
+            switch (static_cast<Role>(std::stoi(userProfile.role)))
+            {
+            case Role::admin:
+            {
+                adminLogin();
+                break;
+            }
+            case Role::chef:
+            {
+                chefLogin();
+                break;
+            }
+            case Role::employee:
+            {
+                employeeLogin();
+                break;
+            }
+            }
         }
-        case Role::employee:
+        else
         {
-            std::cout << "Employee logged In" << std::endl;
-            MenuDAO *menuDAO = new MenuDAO();
-            PublishedMenuDAO *publishedMenuDAO = new PublishedMenuDAO();
-            SelectedItemsDAO *selectedItemsDAO = new SelectedItemsDAO();
-            FeedbackDAO *feedbackDAO = new FeedbackDAO();
-            NotificationDAO *notificationDAO = new NotificationDAO();
-            UserActivityDAO *userActivityDAO = new UserActivityDAO();
-            MenuService *menuService = new MenuService(menuDAO);
-            UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
-            SelectionService *selectionService = new SelectionService(selectedItemsDAO);
-            NotificationService *notificationService = new NotificationService(notificationDAO);
-            FeedbackService *feedbackService = new FeedbackService(feedbackDAO);
-            DiscardItemDAO *discardItemDAO = new DiscardItemDAO();
-            DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO);
-            RecommendationService *recommendationService = new RecommendationService(menuDAO, feedbackDAO);      
-            PublishMenuService *publishMenuService = new PublishMenuService(publishedMenuDAO);
+            if (requestData.first == Operation::logout)
+            {
+                isUserLoggedIn = false;
+                return "close";
+            }
+            response = userController->handleRequest(requestData);
+        }
+        return response;
+    }
+    catch (const std::exception &e)
+    {
+        return e.what();
+    }
+}
 
-            userController = new EmployeeController(notificationService, selectionService, feedbackService,recommendationService,menuService, publishMenuService,discardMenuItemService,userProfile);
-        }
-        }
-    }
-    else
-    {
-        if(requestData.first == Operation::logout)
-        {
-            isUserLoggedIn = false;
-            return "close";
-        }
-        std::cout << "userController " << std::endl;
-        response = userController->handleRequest(requestData);
-        std::cout << "response received" << response[0] << std::endl;
-    }
-    for (int i = 0; i < response.size(); i++)
-    {
-        std::cout << response[i] << std::endl;
-    }
-    return response;
+void RequestProcessor::employeeLogin()
+{
+    std::cout << "Employee logged In" << std::endl;
+    MenuDAO *menuDAO = new MenuDAO();
+    PublishedMenuDAO *publishedMenuDAO = new PublishedMenuDAO();
+    SelectedItemsDAO *selectedItemsDAO = new SelectedItemsDAO();
+    FeedbackDAO *feedbackDAO = new FeedbackDAO();
+    NotificationDAO *notificationDAO = new NotificationDAO();
+    UserActivityDAO *userActivityDAO = new UserActivityDAO();
+    MenuService *menuService = new MenuService(menuDAO);
+    UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
+    SelectionService *selectionService = new SelectionService(selectedItemsDAO);
+    NotificationService *notificationService = new NotificationService(notificationDAO);
+    FeedbackService *feedbackService = new FeedbackService(feedbackDAO);
+    DiscardItemDAO *discardItemDAO = new DiscardItemDAO();
+    DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO);
+    RecommendationService *recommendationService = new RecommendationService(menuDAO, feedbackDAO);
+    PublishMenuService *publishMenuService = new PublishMenuService(publishedMenuDAO);
+    userActivityService->saveUserActivity(userProfile.userId, "Employee Logged In");
+    userController = new EmployeeController(notificationService, selectionService, feedbackService, recommendationService, menuService, publishMenuService, discardMenuItemService, userActivityService, userProfile);
+}
+
+void RequestProcessor::chefLogin()
+{
+    std::cout << "Chef LoggedIn" << std::endl;
+    MenuDAO *menuDao = new MenuDAO();
+    FeedbackDAO *feedbackDao = new FeedbackDAO();
+    PublishedMenuDAO *publishedMenuDAO = new PublishedMenuDAO();
+    PublishMenuService *publishMenuService = new PublishMenuService(publishedMenuDAO);
+    MenuService *menuService = new MenuService(menuDao);
+    SelectedItemsDAO *selectedItemsDAO = new SelectedItemsDAO();
+    RecommendationService *recommendationService = new RecommendationService(menuDao, feedbackDao);
+    UserActivityDAO *userActivityDAO = new UserActivityDAO();
+    DiscardItemDAO *discardItemDAO = new DiscardItemDAO();
+    UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
+    SelectionService *selectionService = new SelectionService(selectedItemsDAO);
+    NotificationDAO *notificationDAO = new NotificationDAO();
+    NotificationService *notificationService = new NotificationService(notificationDAO);
+    FeedbackService *feedbackService = new FeedbackService(feedbackDao);
+    DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO);
+    userActivityService->saveUserActivity(userProfile.userId, "Chef Logged In");
+    userController = new ChefController(recommendationService, selectionService, notificationService, menuService, feedbackService, publishMenuService, userActivityService, discardMenuItemService, userProfile);
+}
+
+void RequestProcessor::adminLogin()
+{
+    std::cout << "Admin LoggedIn" << std::endl;
+    MenuDAO *menuDao = new MenuDAO();
+    UserActivityDAO *userActivityDAO = new UserActivityDAO();
+    MenuService *menuService = new MenuService(menuDao);
+    NotificationDAO *notificationDAO = new NotificationDAO();
+    NotificationService *notificationService = new NotificationService(notificationDAO);
+    UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
+    userActivityService->saveUserActivity(userProfile.userId, "Admin Logged In");
+    userController = new AdminController(menuService, userActivityService, notificationService, userProfile);
 }

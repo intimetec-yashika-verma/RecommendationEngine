@@ -7,15 +7,12 @@
 FeedbackService::FeedbackService(FeedbackDAO *feedbackDAO) : feedbackDAO(feedbackDAO)
 {
 }
-Feedback *FeedbackService::getItemFeedback(const std::string &ItemId)
-{
-}
 
-void FeedbackService::addItemFeedback(std::string userId,std::unordered_map<std::string, Feedback> itemList)
+void FeedbackService::addItemFeedback(std::string userId, std::unordered_map<std::string, Feedback> itemList)
 {
-    for(const auto& item : itemList)
+    for (const auto &item : itemList)
     {
-        feedbackDAO->addItemFeedback(userId,item.first, std::to_string(item.second.rating), item.second.comment);
+        feedbackDAO->addItemFeedback(userId, item.first, std::to_string(item.second.rating), item.second.comment);
     }
 }
 
@@ -24,7 +21,7 @@ std::unordered_map<std::string, std::vector<Feedback>> FeedbackService::itemFeed
     return feedbackDAO->getItemFeedbacks();
 }
 
-void FeedbackService::addFeedbackOnDiscaredItem(std::string userId,std::string itemName,std::string negativePoint,std::string improvement,std::string homeReceipe)
+void FeedbackService::addFeedbackOnDiscaredItem(std::string userId, std::string itemName, std::string negativePoint, std::string improvement, std::string homeReceipe)
 {
-    return feedbackDAO->addFeedbackOnDiscaredItems(userId,itemName,negativePoint,improvement,homeReceipe);
+    return feedbackDAO->addFeedbackOnDiscaredItems(userId, itemName, negativePoint, improvement, homeReceipe);
 }

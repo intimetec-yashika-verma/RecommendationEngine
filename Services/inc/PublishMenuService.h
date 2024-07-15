@@ -1,11 +1,12 @@
 #pragma once
 #include "PublishedMenuDAO.h"
-class PublishMenuService 
+class PublishMenuService
 {
-    public:
+public:
     PublishMenuService(PublishedMenuDAO *publishedMenuDAO);
-    void addPublishedMenu(std::vector<std::string>  itemsList );
+    void addPublishedMenu(std::vector<std::string> itemsList);
     std::vector<std::string> getPublishedMenu();
-    private:
+
+private:
     PublishedMenuDAO *publishedMenuDAO;
 };

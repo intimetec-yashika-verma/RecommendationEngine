@@ -28,3 +28,26 @@ unacceptable
 criticize
 condemn
 regretful
+bad
+average
+too oily
+dry
+undercooked
+lacked
+bland
+not as expected
+greasy
+tough
+overcooked
+terrible
+awful
+poor
+disappointing
+too spicy
+strong aftertaste
+not good
+unpleasant
+horrible
+worse
+worst
+mediocre

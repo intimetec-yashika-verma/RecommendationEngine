@@ -17,9 +17,7 @@ public:
     ~Server();
 
     void startListening();
-     std::vector<std::string> receiveMessage();
-    bool sendMessage(std::vector<std::string> message);
-     DatabaseConnection *connection;
+    void stop();
 
 private:
     int serverSocket;
@@ -29,4 +27,5 @@ private:
     socklen_t clientAddrLen;
     int port;
     std::vector<std::thread> clientThreads;
+    std::vector<int> clientSockets;
 };

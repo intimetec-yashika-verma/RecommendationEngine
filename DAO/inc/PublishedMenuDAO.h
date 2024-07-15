@@ -5,7 +5,7 @@
 class PublishedMenuDAO
 {
 public:
-PublishedMenuDAO();
+  PublishedMenuDAO();
   void addItems(std::string itemList);
   std::vector<std::string> getItems();
 

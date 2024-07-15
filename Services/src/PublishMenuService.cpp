@@ -1,12 +1,13 @@
 #include "PublishMenuService.h"
 
-PublishMenuService::PublishMenuService(PublishedMenuDAO *publishedMenuDAO):publishedMenuDAO(publishedMenuDAO)
-{}
+PublishMenuService::PublishMenuService(PublishedMenuDAO *publishedMenuDAO) : publishedMenuDAO(publishedMenuDAO)
+{
+}
 void PublishMenuService::addPublishedMenu(std::vector<std::string> itemsList)
 {
-   for(int i=0;i<itemsList.size();i++)
+   for (int i = 1; i < itemsList.size(); i++)
    {
-    publishedMenuDAO->addItems(itemsList[i]);
+      publishedMenuDAO->addItems(itemsList[i]);
    }
 }
 

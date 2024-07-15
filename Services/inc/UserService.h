@@ -6,15 +6,13 @@
 #include "UserDAO.h"
 #include "User.h"
 #include "UserProfile.h"
-#include "UserActivityDAO.h"
 
-class UserService {
+class UserService
+{
 public:
-    UserService(UserDAO *userDao,UserActivityDAO *userActivityDAO);   
-    UserProfile authenticateUser(std::string userName,std::string password);
-    void saveUserActivity(std::string userName,std::string activity);
+    UserService(UserDAO *userDao);
+    UserProfile authenticateUser(std::string userName, std::string password);
 
 private:
-   UserDAO *userDAO;
-    UserActivityDAO *userActivityDAO;
+    UserDAO *userDAO;
 };

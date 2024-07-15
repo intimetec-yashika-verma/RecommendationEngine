@@ -1,5 +1,6 @@
 #include "IUserInterface.h"
 #include "Client.h"
+#include "Helper.h"
 class EmployeeInterface : public IUserInterface
 {
 public:
@@ -10,7 +11,9 @@ public:
     void getListOfItemsToVote();
     void giveFeedback();
     void giveReviewOnDiscardedItem();
+    void logout();  
 
 private:
+   Helper *helper;
     Client *client;
 };

@@ -6,10 +6,10 @@
 class NotificationDAO
 {
 public:
-NotificationDAO();
+    NotificationDAO();
     void addNewNotification(std::string notificationMessage);
-    std::string getLastUserId();
     std::vector<std::string> getUserNotifcations(std::string userId);
+    void setSeenStatus(std::string userId);
 
 private:
     DatabaseConnection *dbConnection;
