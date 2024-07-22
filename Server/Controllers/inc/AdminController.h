@@ -12,7 +12,7 @@
 class AdminController : public IUserController
 {
 public:
-  AdminController(MenuService *menuService, UserActivityService *userActivityService, NotificationService *notificationService, UserProfile userProfile);
+  AdminController(MenuService *menuService,UserProfile userProfile);
   std::string addMenuItem(std::string adminChoice);
   std::string updateMenuItem(std::string adminChoice);
   std::string deleteItemFromMenu(std::string adminChoice);
@@ -20,10 +20,6 @@ public:
   std::string handleRequest(std::pair<Operation, std::string> request);
 
 private:
-  void addUserActivity(std::string message);
-  void addNotification(std::string message);
-  UserActivityService *userActivityService;
-  NotificationService *notificationService;
   MenuService *menuService;
   UserProfile userProfile;
   Helper *helper;

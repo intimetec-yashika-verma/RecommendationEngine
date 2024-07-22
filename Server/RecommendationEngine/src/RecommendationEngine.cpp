@@ -1,4 +1,4 @@
-#include "RecommendationService.h"
+#include "RecommendationEngine.h"
 #include "FeedbackService.h"
 #include "MenuService.h"
 #include <queue>
@@ -6,7 +6,7 @@
 #include <string>
 #include <algorithm>
 
-RecommendationService::RecommendationService()
+RecommendationEngine::RecommendationEngine()
 {
     helper = new Helper();
     positiveWords_ = helper->readWordsFromFile("PositiveWords.txt");
@@ -14,14 +14,11 @@ RecommendationService::RecommendationService()
     negationWords_ = helper->readWordsFromFile("NegationWords.txt");
 }
 
-std::vector<ItemReview> RecommendationService::recommendTopFoodItems(
+std::vector<ItemReview> RecommendationEngine::recommendTopFoodItems(
     std::string mealType,
     const std::unordered_map<std::string, std::vector<Feedback>> &feedbackMap,
     const std::vector<MenuItem> &menuItems)
 {
-    std::cout << mealType << std::endl;
-    std::cout << "feedbackMap size : " << feedbackMap.size() << std::endl;
-    std::cout << "menuItems size : " << menuItems.size() << std::endl;
     auto comp = [](const std::pair<double, ItemReview> &a, const std::pair<double, ItemReview> &b)
     {
         return a.first < b.first;
@@ -32,20 +29,14 @@ std::vector<ItemReview> RecommendationService::recommendTopFoodItems(
     for (const auto &pair : feedbackMap)
     {
         std::string menuItemName = pair.first;
-        std::cout << pair.first << std::endl;
-        // Find the MenuItem object corresponding to menuItemId
         auto it = std::find_if(menuItems.begin(), menuItems.end(),
                                [&](const MenuItem &item)
                                { return item.itemName == menuItemName; });
-
-        // recommend only available food Items : assumption that avaiablity of items for tomorrow will be updated today only by admin.
 
         if (it != menuItems.end() && it->mealType == mealType && it->availability == "YES")
         {
             std::pair<double, ItemReview> score = evaluateFoodItem(pair.second);
             score.second.itemName = it->itemName;
-            std::cout << "score.first : " << score.first << std::endl;
-            std::cout << "score.second.itemName : " << score.second.itemName << std::endl;
             foodItemScores.push({score.first, score.second});
         }
     }
@@ -61,24 +52,16 @@ std::vector<ItemReview> RecommendationService::recommendTopFoodItems(
     return topFoodItems;
 }
 
-std::string RecommendationService::getMostRepetativeSentiments(const std::vector<std::string> &words)
+std::string RecommendationEngine::getMostRepetativeSentiments(const std::vector<std::string> &words)
 {
     std::unordered_map<std::string, int> wordCount;
-
-    // Count occurrences of each word
     for (const std::string &word : words)
     {
         wordCount[word]++;
     }
-
-    // Create a vector of pairs (word, count) from the map
     std::vector<std::pair<std::string, int>> wordFreq(wordCount.begin(), wordCount.end());
-
-    // Sort the vector based on count (in descending order)
     std::sort(wordFreq.begin(), wordFreq.end(), [](const auto &a, const auto &b)
               { return a.second > b.second; });
-
-    // Extract top 4 words
     std::vector<std::string> topWords;
     int count = 0;
     for (const auto &pair : wordFreq)
@@ -88,8 +71,6 @@ std::string RecommendationService::getMostRepetativeSentiments(const std::vector
         if (count >= 4)
             break;
     }
-
-    // Join top 4 words into a comma-separated string
     std::string result;
     for (size_t i = 0; i < topWords.size(); ++i)
     {
@@ -103,7 +84,7 @@ std::string RecommendationService::getMostRepetativeSentiments(const std::vector
     return result;
 }
 
-std::pair<double, ItemReview> RecommendationService::evaluateFoodItem(std::vector<Feedback> feedbacks)
+std::pair<double, ItemReview> RecommendationEngine::evaluateFoodItem(std::vector<Feedback> feedbacks)
 {
     double totalScore = 0.0;
     double averageSentimentScore = 0.0;
@@ -124,15 +105,11 @@ std::pair<double, ItemReview> RecommendationService::evaluateFoodItem(std::vecto
 
     averageRating /= feedbacks.size();
     totalScore = (averageSentimentScore + averageRating) / 2.0;
-    for (auto i : sentiments)
-    {
-        std::cout << "sentiments : " << i << std::endl;
-    }
     std::pair<double, ItemReview> result(totalScore, ItemReview("", averageRating, sentiments));
     return result;
 }
 
-double RecommendationService::analyzeSentiment(const std::string &comment, std::vector<std::string> &foundSentiments)
+double RecommendationEngine::analyzeSentiment(const std::string &comment, std::vector<std::string> &foundSentiments)
 {
     std::string lowerComment = helper->toLower(comment);
     std::vector<std::string> words = helper->splitWords(lowerComment);
@@ -176,15 +153,10 @@ double RecommendationService::analyzeSentiment(const std::string &comment, std::
     {
         sentimentScore = -1;
     }
-    for (auto i : foundSentiments)
-    {
-        std::cout << "foundSentiments : " << i << std::endl;
-    }
-
     return ((sentimentScore + 1) / 2) * 5;
 }
 
-std::vector<ItemReview> RecommendationService::generateDiscardList(
+std::vector<ItemReview> RecommendationEngine::generateDiscardList(
     const std::unordered_map<std::string, std::vector<Feedback>> &feedbackMap,
     const std::vector<MenuItem> &menuItems)
 {
@@ -193,8 +165,6 @@ std::vector<ItemReview> RecommendationService::generateDiscardList(
     for (const auto &pair : feedbackMap)
     {
         std::string menuItemName = pair.first;
-
-        // Find the MenuItem object corresponding to menuItemId
         auto it = std::find_if(menuItems.begin(), menuItems.end(),
                                [&](const MenuItem &item)
                                { return item.itemName == menuItemName; });
@@ -203,18 +173,16 @@ std::vector<ItemReview> RecommendationService::generateDiscardList(
         {
             std::pair<double, ItemReview> score = evaluateFoodItem(pair.second);
             score.second.itemName = it->itemName;
-            std::cout << score.second.averageRating << std::endl;
             if (score.first < 3 && score.second.averageRating < 2)
             {
                 discardList.push_back(score.second);
-                std::cout << "pushing list in it discard Menu list" << std::endl;
             }
         }
     }
     return discardList;
 }
 
-std::vector<MenuItem> RecommendationService::sortRecommendedMenuItemsBasedOnProfile(
+std::vector<MenuItem> RecommendationEngine::sortRecommendedMenuItemsBasedOnProfile(
     UserProfile userProfile,
     std::vector<MenuItem> chefRolloutMenuForNextDay,
     std::vector<MenuItem> menuItems)
@@ -253,8 +221,6 @@ std::vector<MenuItem> RecommendationService::sortRecommendedMenuItemsBasedOnProf
             // Evaluate sweet tooth preference
             if (userProfile.sweetTooth == itB->sweet) scoreB++;
         }
-
-        // Higher score items should come first
         return scoreA > scoreB; });
 
     return sortedMenuItems;

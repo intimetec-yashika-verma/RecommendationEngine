@@ -8,14 +8,14 @@
 #include "ItemReview.h"
 #include "UserProfile.h"
 #include "Helper.h"
-class RecommendationService
+class RecommendationEngine
 {
 public:
     FeedbackService *feedbackService_{nullptr};
     std::unordered_set<std::string> positiveWords_;
     std::unordered_set<std::string> negativeWords_;
     std::unordered_set<std::string> negationWords_;
-    RecommendationService();
+    RecommendationEngine();
     std::vector<ItemReview> recommendTopFoodItems(std::string mealType,
                                                   const std::unordered_map<std::string, std::vector<Feedback>> &feedbackMap,
                                                   const std::vector<MenuItem> &menuItems);

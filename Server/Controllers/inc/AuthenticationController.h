@@ -5,7 +5,8 @@
 class AuthenticationController
 {
 public:
-    UserService *userService;
     AuthenticationController(UserService *userService);
     UserProfile authenticateUser(std::string userData);
+private:
+    UserService *userService;
 };

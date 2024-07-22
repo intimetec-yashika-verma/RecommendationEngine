@@ -8,7 +8,7 @@
 #include "AdminController.h"
 #include "MenuDAO.h"
 #include "MenuService.h"
-#include "RecommendationService.h"
+#include "RecommendationEngine.h"
 #include "SelectionService.h"
 #include "NotificationService.h"
 #include "ChefController.h"
@@ -91,50 +91,50 @@ void RequestProcessor::employeeLogin()
     FeedbackDAO *feedbackDAO = new FeedbackDAO();
     NotificationDAO *notificationDAO = new NotificationDAO();
     UserActivityDAO *userActivityDAO = new UserActivityDAO();
-    MenuService *menuService = new MenuService(menuDAO);
     UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
-    SelectionService *selectionService = new SelectionService(selectedItemsDAO);
-    NotificationService *notificationService = new NotificationService(notificationDAO);
-    FeedbackService *feedbackService = new FeedbackService(feedbackDAO);
+    NotificationService *notificationService = new NotificationService(notificationDAO,userActivityService);
+    MenuService *menuService = new MenuService(menuDAO,notificationService,userActivityService);
+    SelectionService *selectionService = new SelectionService(selectedItemsDAO,notificationService,userActivityService);
+    FeedbackService *feedbackService = new FeedbackService(feedbackDAO,userActivityService);
     DiscardItemDAO *discardItemDAO = new DiscardItemDAO();
     DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO);
-    RecommendationService *recommendationService = new RecommendationService(menuDAO, feedbackDAO);
+    RecommendationEngine *recommendationEngine = new RecommendationEngine();
     PublishMenuService *publishMenuService = new PublishMenuService(publishedMenuDAO);
     userActivityService->saveUserActivity(userProfile.userId, "Employee Logged In");
-    userController = new EmployeeController(notificationService, selectionService, feedbackService, recommendationService, menuService, publishMenuService, discardMenuItemService, userActivityService, userProfile);
+    userController = new EmployeeController(notificationService, selectionService, feedbackService, recommendationEngine, menuService, publishMenuService, discardMenuItemService, userActivityService, userProfile);
 }
 
 void RequestProcessor::chefLogin()
 {
     std::cout << "Chef LoggedIn" << std::endl;
-    MenuDAO *menuDao = new MenuDAO();
+    MenuDAO *menuDAO = new MenuDAO();
     FeedbackDAO *feedbackDao = new FeedbackDAO();
     PublishedMenuDAO *publishedMenuDAO = new PublishedMenuDAO();
     PublishMenuService *publishMenuService = new PublishMenuService(publishedMenuDAO);
-    MenuService *menuService = new MenuService(menuDao);
     SelectedItemsDAO *selectedItemsDAO = new SelectedItemsDAO();
-    RecommendationService *recommendationService = new RecommendationService(menuDao, feedbackDao);
+    RecommendationEngine *recommendationEngine = new RecommendationEngine();
     UserActivityDAO *userActivityDAO = new UserActivityDAO();
     DiscardItemDAO *discardItemDAO = new DiscardItemDAO();
     UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
-    SelectionService *selectionService = new SelectionService(selectedItemsDAO);
     NotificationDAO *notificationDAO = new NotificationDAO();
-    NotificationService *notificationService = new NotificationService(notificationDAO);
-    FeedbackService *feedbackService = new FeedbackService(feedbackDao);
+    NotificationService *notificationService = new NotificationService(notificationDAO,userActivityService);
+    FeedbackService *feedbackService = new FeedbackService(feedbackDao,userActivityService);
     DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO);
+    MenuService *menuService = new MenuService(menuDAO,notificationService,userActivityService);
+    SelectionService *selectionService = new SelectionService(selectedItemsDAO,notificationService,userActivityService);
     userActivityService->saveUserActivity(userProfile.userId, "Chef Logged In");
-    userController = new ChefController(recommendationService, selectionService, notificationService, menuService, feedbackService, publishMenuService, userActivityService, discardMenuItemService, userProfile);
+    userController = new ChefController(recommendationEngine, selectionService, menuService, feedbackService, publishMenuService, discardMenuItemService, userProfile);
 }
 
 void RequestProcessor::adminLogin()
 {
     std::cout << "Admin LoggedIn" << std::endl;
-    MenuDAO *menuDao = new MenuDAO();
+    MenuDAO *menuDAO = new MenuDAO();
     UserActivityDAO *userActivityDAO = new UserActivityDAO();
-    MenuService *menuService = new MenuService(menuDao);
     NotificationDAO *notificationDAO = new NotificationDAO();
-    NotificationService *notificationService = new NotificationService(notificationDAO);
     UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
+    NotificationService *notificationService = new NotificationService(notificationDAO,userActivityService);
+    MenuService *menuService = new MenuService(menuDAO,notificationService,userActivityService);
     userActivityService->saveUserActivity(userProfile.userId, "Admin Logged In");
-    userController = new AdminController(menuService, userActivityService, notificationService, userProfile);
+    userController = new AdminController(menuService,userProfile);
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "RecommendationService.h"
+#include "RecommendationEngine.h"
 #include "SelectionService.h"
 #include "NotificationService.h"
 #include "IUserController.h"
@@ -15,8 +15,7 @@
 class ChefController : public IUserController
 {
 public:
-  ChefController(RecommendationService *recommendationService, SelectionService *selectionService, NotificationService *notificationService, MenuService *menuService, FeedbackService *feedbackService, PublishMenuService *publishMenuService, UserActivityService *userActivityService, DiscardMenuItemService *discardMenuItemService, UserProfile userProfile);
-  void rollOutNextDayMenu(std::vector<std::string>);
+  ChefController(RecommendationEngine *recommendationEngine, SelectionService *selectionService, MenuService *menuService, FeedbackService *feedbackService, PublishMenuService *publishMenuService, DiscardMenuItemService *discardMenuItemService, UserProfile userProfile);
   std::vector<ItemReview> getRecommendedMenu(std::string mealType);
   std::string handleRequest(std::pair<Operation, std::string> request);
   std::string showRecommendations(std::string mealType);
@@ -27,10 +26,8 @@ public:
   std::string getFeedbackOrHomeReceipe(std::string itemName);
 
 private:
-  void addUserActivity(std::string message);
-  void addNotification(std::string message);
   std::vector<ItemReview> recommendedMenu;
-  RecommendationService *recommendationService;
+  RecommendationEngine *recommendationEngine;
   SelectionService *selectionService;
   NotificationService *notificationService;
   MenuService *menuService;

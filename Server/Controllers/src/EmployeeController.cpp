@@ -6,13 +6,11 @@
 #include "FeedbackService.h"
 #include "Server.h"
 #include "UserProfile.h"
-
-#include "RecommendationService.h"
-
+#include "RecommendationEngine.h"
 #include "DiscardedItemReview.h"
 #include "UserActivityService.h"
 
-EmployeeController::EmployeeController(NotificationService *notificationService, SelectionService *selectionService, FeedbackService *feedbackService, RecommendationService *recommendationService, MenuService *menuService, PublishMenuService *publishMenuService, DiscardMenuItemService *discardMenuItemService, UserActivityService *userActivityService, UserProfile userProfile) : notificationService(notificationService), selectionService(selectionService), feedbackService(feedbackService), recommendationService(recommendationService), menuService(menuService), publishMenuService(publishMenuService), discardMenuItemService(discardMenuItemService), userActivityService(userActivityService), userProfile(userProfile)
+EmployeeController::EmployeeController(NotificationService *notificationService, SelectionService *selectionService, FeedbackService *feedbackService, RecommendationEngine *recommendationEngine, MenuService *menuService, PublishMenuService *publishMenuService, DiscardMenuItemService *discardMenuItemService, UserActivityService *userActivityService, UserProfile userProfile) : notificationService(notificationService), selectionService(selectionService), feedbackService(feedbackService), recommendationEngine(recommendationEngine), menuService(menuService), publishMenuService(publishMenuService), discardMenuItemService(discardMenuItemService), userActivityService(userActivityService), userProfile(userProfile)
 {
     helper = new Helper();
 }
@@ -64,7 +62,6 @@ std::string EmployeeController::handleRequest(std::pair<Operation, std::string> 
 std::string EmployeeController::showNotifications()
 {
     std::vector<std::string> notifications = notificationService->getAllNotifications(userProfile.userId);
-    addUserActivity("Viewed Notification");
     std::string notificationsCommaSeprated = helper->serialize(notifications);
     return notificationsCommaSeprated;
 }
@@ -73,7 +70,7 @@ std::string EmployeeController::voteForTomorrowMenu(std::string mealType)
 {
     std::vector<MenuItem> selectedItemsList = selectionService->getListOfItemsToVoteForMealType(mealType);
     std::vector<MenuItem> menuItemsList = menuService->getMenuItem();
-    std::vector<MenuItem> items = recommendationService->sortRecommendedMenuItemsBasedOnProfile(userProfile, selectedItemsList, menuItemsList);
+    std::vector<MenuItem> items = recommendationEngine->sortRecommendedMenuItemsBasedOnProfile(userProfile, selectedItemsList, menuItemsList);
     std::vector<ItemReview> itemReview = selectionService->getSelectedItemsReview();
     std::vector<ItemReview> sortedItems;
     for (int i = 0; i < items.size(); i++)
@@ -87,36 +84,27 @@ std::string EmployeeController::voteForTomorrowMenu(std::string mealType)
         }
     }
     std::string itemReviewCommaSeprated = helper->serializeItemReview(itemReview);
-    std::cout << itemReviewCommaSeprated << std::endl;
     return itemReviewCommaSeprated;
 }
 
 std::string EmployeeController::getVotedItems(std::string itemsList)
 {
     std::vector<std::string> votedItems = helper->deserialize(itemsList);
-    selectionService->saveVotes(votedItems);
-    addUserActivity("Voted for :" + votedItems[0]);
-    return "";
+    selectionService->saveVotes(userProfile.userId,votedItems);
+    return "voting saved";
 }
 
 std::string EmployeeController::getItemsListForFeedback()
 {
     std::vector<std::string> itemsList = publishMenuService->getPublishedMenu();
     std::string itemsListCommaSeprated = helper->serialize(itemsList);
-    std::cout << itemsListCommaSeprated << std::endl;
     return itemsListCommaSeprated;
 }
 
 std::string EmployeeController::getUserFeedback(std::string response)
 {
     std::unordered_map<std::string, Feedback> feedback = helper->deserializeFeedbacks(response);
-    for (int i = 0; i < response.size(); i++)
-    {
-        std::cout << response[i] << std::endl;
-    }
-
     feedbackService->addItemFeedback(userProfile.userId, feedback);
-    addUserActivity("added feedback");
     return response;
 }
 
@@ -131,16 +119,5 @@ std::string EmployeeController::getFeedbackOnDiscardedItem(std::string feedback)
 {
     DiscardedItemReview itemReview = helper->deserializeDiscardedItemReview(feedback);
     feedbackService->addFeedbackOnDiscaredItem(userProfile.userId, itemReview.itemName, itemReview.negativePointOnItem, itemReview.improvementPointOnItem, itemReview.homeRecepie);
-    addUserActivity("added feedback on discarded item");
     return "feedback added";
-}
-
-void EmployeeController::addUserActivity(std::string message)
-{
-    userActivityService->saveUserActivity(userProfile.userId, message);
-}
-
-void EmployeeController::addNotification(std::string message)
-{
-    notificationService->sendNewNotification(message);
 }
