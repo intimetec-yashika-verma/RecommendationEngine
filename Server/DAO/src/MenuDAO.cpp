@@ -39,7 +39,7 @@ void MenuDAO::updateMenuItem(std::string userId, std::string name, std::string p
 
 void MenuDAO::removeMenuItem(std::string userId, std::string name)
 {
-    std::string query = "CALL DeleteMenuItemAndNotify('" + name + "','" + userId + "')";
+    std::string query = "DELETE FROM MenuItem WHERE name = '" + name + "'";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;

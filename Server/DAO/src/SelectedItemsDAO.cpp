@@ -24,7 +24,7 @@ void SelectedItemsDAO::addSlectedItems(std::string itemName, std::string rating,
 }
 std::vector<VoteCount> SelectedItemsDAO::getSelectedItemsAndVotes(std::string mealType)
 {
-    std::string query = "SELECT csi.itemName, csi.voteCount FROM ChefSelectedItem csi JOIN MenuItem mi ON csi.name = mi.name WHERE mi.mealType = '" + mealType + "'";
+    std::string query = "SELECT csi.itemName, csi.voteCount FROM ChefSelectedItem csi JOIN MenuItem mi ON csi.itemName = mi.name WHERE mi.mealType = '" + mealType + "'";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
@@ -89,7 +89,7 @@ std::vector<MenuItem> SelectedItemsDAO::getSelectedItems()
 
 void SelectedItemsDAO::saveUserVotes(std::string itemName)
 {
-    std::string query = "UPDATE ChefSelectedItem SET voteCount = voteCount + 1 WHERE name = '" + itemName + "'";
+    std::string query = "UPDATE ChefSelectedItem SET voteCount = voteCount + 1 WHERE itemName = '" + itemName + "'";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;
@@ -108,7 +108,6 @@ std::vector<MenuItem> SelectedItemsDAO::getSelectedItemForMealType(std::string m
     char date[11];
     strftime(date, sizeof(date), "%Y-%m-%d", now);
     std::string dateString = date;
-    std::cout << dateString << std::endl;
     std::string query = "SELECT mi.name,  mi.dietaryCategory,  mi.spiceLevel,  mi.cuisineCategory,  mi.isSweet FROM ChefSelectedItem si JOIN MenuItem mi ON si.itemName = mi.name WHERE mi.mealType = '" + mealType + "' AND si.createdAt = '" + dateString + "'";
 
     if (mysql_query(connection, query.c_str()))

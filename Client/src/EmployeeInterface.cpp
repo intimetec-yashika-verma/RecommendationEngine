@@ -31,6 +31,7 @@ void EmployeeInterface::showUserMenuPrompt()
                   << std::endl;
         int employeeChoice;
         std::cin >> employeeChoice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         switch (employeeChoice)
         {
@@ -65,7 +66,7 @@ void EmployeeInterface::viewNotification()
     std::vector<std::string> notificationVector = helper->deserialize(notificationData);
     for (int i = 0; i < notificationVector.size(); i++)
     {
-        std::cout << i + 1 << " " << notificationVector[i] << std::endl;
+        std::cout << i << " " << notificationVector[i] << std::endl;
     }
 }
 
@@ -130,13 +131,13 @@ void EmployeeInterface::getListOfItemsToVote()
         switch (userInput)
         {
         case 1:
-            voteForTomorrowMenu("breakfast");
+            voteForTomorrowMenu("Breakfast");
             break;
         case 2:
-            voteForTomorrowMenu("lunch");
+            voteForTomorrowMenu("Lunch");
             break;
         case 3:
-            voteForTomorrowMenu("dinner");
+            voteForTomorrowMenu("Dinner");
             break;
         case 4:
             flag = false;
@@ -159,17 +160,12 @@ void EmployeeInterface::giveFeedback()
         std::cout << "Enter feedback for dish:- " << menuItemListVector[i] << std::endl;
         Feedback feedbackData;
         std::cout << "Enter rating:- " << std::endl;
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cin >> feedbackData.rating;
         std::cout << "Enter the comment for dish:- " << std::endl;
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::getline(std::cin >> std::ws, feedbackData.comment);
         feedbacks[menuItemListVector[i]] = feedbackData;
     }
     std::string input = std::to_string(Operation::saveFeedback) + "$" + helper->serializeFeedbacks(feedbacks);
-    std::cout << input << std::endl;
     client->sendMessage(input);
     std::string serverResponse = client->receiveMessage();
 }
@@ -198,7 +194,6 @@ void EmployeeInterface::giveReviewOnDiscardedItem()
         std::getline(std::cin >> std::ws, discardedItemReview.homeRecepie);
     }
     std::string input = std::to_string(Operation::getFeedbackOnDiscardedItem) + "$" + discardedItemReview.serialize();
-    std::cout << input << std::endl;
     client->sendMessage(input);
     std::string serverResponse = client->receiveMessage();
 }

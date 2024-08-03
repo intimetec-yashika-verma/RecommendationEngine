@@ -55,7 +55,6 @@ void ChefInterface::getRecommendationMenu(std::string mealType)
     std::string userResponse = std::to_string(Operation::getRecommandationFromEngine) + "$" + mealType;
     client->sendMessage(userResponse);
     std::string menu = client->receiveMessage();
-    std::cout << menu << std::endl;
     std::cout << "Select items for tomorrow's " << mealType << ":-" << std::endl;
     std::vector<ItemReview> items = helper->deserializeItemReview(menu);
     for (int i = 0; i < items.size(); i++)
@@ -205,7 +204,8 @@ void ChefInterface::discardItemFromMenu()
         {
             std::cout << items[i].sentiments[j] << ",";
         }
-        std::cout << "1. Discard Item\n"
+
+        std::cout << "\n1. Discard Item\n"
                      "2. Ask Home recipe from employees\n";
         int userInput;
         std::cin >> userInput;

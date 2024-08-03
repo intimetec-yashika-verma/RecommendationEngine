@@ -46,7 +46,6 @@ bool Client::connectToServer()
 bool Client::sendMessage(std::string message)
 {
     ssize_t bytesSent = send(clientSocket, message.c_str(), message.size(), 0);
-    std::cout << bytesSent << std::endl;
     if (bytesSent == -1)
     {
         std::cerr << "Send failed." << std::endl;
@@ -57,7 +56,7 @@ bool Client::sendMessage(std::string message)
 
 std::string Client::receiveMessage()
 {
-    char buffer[1024];
+    char buffer[4096];
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
     if (buffer == "exit")
     {

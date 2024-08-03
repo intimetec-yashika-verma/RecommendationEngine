@@ -8,7 +8,6 @@ UserActivityDAO::UserActivityDAO() : dbConnection{DatabaseConnection::getInstanc
 
 void UserActivityDAO::saveUserActivity(std::string userId, std::string activity)
 {
-    std::cout << "Saving user activity" << std::endl;
     std::string query = "INSERT INTO UserActivity (userId, activity) VALUES ('" + userId + "', '" + activity + "')";
     if (mysql_query(connection, query.c_str()))
     {

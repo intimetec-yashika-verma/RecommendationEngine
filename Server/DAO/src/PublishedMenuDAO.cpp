@@ -34,6 +34,7 @@ std::vector<std::string> PublishedMenuDAO::getItems()
     {
         std::string data = row[0];
         itemsList.push_back(data);
+        std::cout<<data<<std::endl;
     }
     mysql_free_result(result);
     return itemsList;

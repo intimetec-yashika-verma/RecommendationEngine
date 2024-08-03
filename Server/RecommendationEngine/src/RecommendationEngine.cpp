@@ -42,7 +42,7 @@ std::vector<ItemReview> RecommendationEngine::recommendTopFoodItems(
     }
 
     std::vector<ItemReview> topFoodItems;
-    while (topFoodItems.size() < 4 && !foodItemScores.empty())
+    while (topFoodItems.size() < 8 && !foodItemScores.empty())
     {
         ItemReview itemReview = foodItemScores.top().second;
         topFoodItems.push_back(itemReview);

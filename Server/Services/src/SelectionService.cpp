@@ -4,12 +4,15 @@
 #include "PublishedMenuDAO.h"
 #include "VoteCount.h"
 
-SelectionService::SelectionService(SelectedItemsDAO *selectedItemsDAO,NotificationService *notificationService,UserActivityService *userActivityService) : selectedItemsDAO(selectedItemsDAO)
+SelectionService::SelectionService(SelectedItemsDAO *selectedItemsDAO, NotificationService *notificationService, UserActivityService *userActivityService) : selectedItemsDAO(selectedItemsDAO), notificationService(notificationService), userActivityService(userActivityService)
 {
     helper = new Helper();
 }
-void SelectionService::addSelectedItems(std::string userId,std::vector<std::string> selectedItems, std::vector<ItemReview> recommendedMenu)
-{ for (int i = 1; i < selectedItems.size(); i++)
+void SelectionService::addSelectedItems(std::string userId, std::vector<std::string> selectedItems, std::vector<ItemReview> recommendedMenu)
+
+{
+
+    for (int i = 1; i < selectedItems.size(); i++)
     {
         for (int j = 0; j < recommendedMenu.size(); j++)
         {
@@ -19,7 +22,7 @@ void SelectionService::addSelectedItems(std::string userId,std::vector<std::stri
             }
         }
     }
-    notificationService->sendNewNotification(userId,"Vote for tommorow " + selectedItems[0]);
+    notificationService->sendNewNotification(userId, "Vote for tommorow " + selectedItems[0]);
 }
 
 std::vector<VoteCount> SelectionService::getVotedItemsList(std::string mealType)
@@ -33,14 +36,13 @@ std::vector<MenuItem> SelectionService::getListOfItemsToVote()
     return selectedItemsDAO->getSelectedItems();
 }
 
-void SelectionService::saveVotes(std::string userId,std::vector<std::string> votedItems)
+void SelectionService::saveVotes(std::string userId, std::vector<std::string> votedItems)
 {
-    for (int i = 0; i < votedItems.size(); i++)
+    for (int i = 1; i < votedItems.size(); i++)
     {
-        std::cout << votedItems[i] << std::endl;
         selectedItemsDAO->saveUserVotes(votedItems[i]);
     }
-    userActivityService->saveUserActivity(userId,"Voted for Items");
+    userActivityService->saveUserActivity(userId, "Voted for Items");
 }
 
 std::vector<MenuItem> SelectionService::getListOfItemsToVoteForMealType(std::string mealType)

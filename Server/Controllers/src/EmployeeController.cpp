@@ -83,7 +83,11 @@ std::string EmployeeController::voteForTomorrowMenu(std::string mealType)
             }
         }
     }
-    std::string itemReviewCommaSeprated = helper->serializeItemReview(itemReview);
+    for(int i=0;i<sortedItems.size();i++)
+    {
+        std::cout<<"yashika "<<sortedItems[i].itemName<<std::endl;
+    }
+    std::string itemReviewCommaSeprated = helper->serializeItemReview(sortedItems);
     return itemReviewCommaSeprated;
 }
 
@@ -98,6 +102,7 @@ std::string EmployeeController::getItemsListForFeedback()
 {
     std::vector<std::string> itemsList = publishMenuService->getPublishedMenu();
     std::string itemsListCommaSeprated = helper->serialize(itemsList);
+    std::cout<<itemsListCommaSeprated<<std::endl;
     return itemsListCommaSeprated;
 }
 

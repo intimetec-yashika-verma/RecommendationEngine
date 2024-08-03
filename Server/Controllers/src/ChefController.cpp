@@ -71,6 +71,10 @@ std::string ChefController::showRecommendations(std::string mealType)
 std::string ChefController::getSelectedMenu(std::string userResponse)
 {
     std::vector<std::string> selectedItems = helper->deserialize(userResponse);
+    for(int i=0;i<selectedItems.size();i++)
+    {
+        std::cout<<selectedItems[i]<<std::endl;
+    }
     selectionService->addSelectedItems(userProfile.userId,selectedItems,recommendedMenu);
     std::string success = "got the selected menu";
     return success;
@@ -98,7 +102,7 @@ std::string ChefController::getDiscardedMenuItemsList()
     for (int i = 0; i < item.size(); i++)
     {
         std::string sentiments = helper->serialize(item[i].sentiments);
-        discardMenuItemService->addDiscardedItem(item[i].itemName, std::to_string(item[i].averageRating), sentiments);
+        discardMenuItemService->addDiscardedItem(userProfile.userId,item[i].itemName, std::to_string(item[i].averageRating), sentiments);
     }
     std::string discardedItems = helper->serializeItemReview(item);
     return discardedItems;

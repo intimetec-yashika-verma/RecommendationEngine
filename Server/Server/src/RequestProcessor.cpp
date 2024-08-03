@@ -97,7 +97,7 @@ void RequestProcessor::employeeLogin()
     SelectionService *selectionService = new SelectionService(selectedItemsDAO,notificationService,userActivityService);
     FeedbackService *feedbackService = new FeedbackService(feedbackDAO,userActivityService);
     DiscardItemDAO *discardItemDAO = new DiscardItemDAO();
-    DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO);
+    DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO,userActivityService,notificationService); 
     RecommendationEngine *recommendationEngine = new RecommendationEngine();
     PublishMenuService *publishMenuService = new PublishMenuService(publishedMenuDAO);
     userActivityService->saveUserActivity(userProfile.userId, "Employee Logged In");
@@ -114,12 +114,12 @@ void RequestProcessor::chefLogin()
     SelectedItemsDAO *selectedItemsDAO = new SelectedItemsDAO();
     RecommendationEngine *recommendationEngine = new RecommendationEngine();
     UserActivityDAO *userActivityDAO = new UserActivityDAO();
+    NotificationDAO *notificationDAO = new NotificationDAO();
     DiscardItemDAO *discardItemDAO = new DiscardItemDAO();
     UserActivityService *userActivityService = new UserActivityService(userActivityDAO);
-    NotificationDAO *notificationDAO = new NotificationDAO();
     NotificationService *notificationService = new NotificationService(notificationDAO,userActivityService);
     FeedbackService *feedbackService = new FeedbackService(feedbackDao,userActivityService);
-    DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO);
+    DiscardMenuItemService *discardMenuItemService = new DiscardMenuItemService(discardItemDAO,userActivityService,notificationService);
     MenuService *menuService = new MenuService(menuDAO,notificationService,userActivityService);
     SelectionService *selectionService = new SelectionService(selectedItemsDAO,notificationService,userActivityService);
     userActivityService->saveUserActivity(userProfile.userId, "Chef Logged In");

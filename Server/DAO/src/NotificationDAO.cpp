@@ -9,6 +9,7 @@ NotificationDAO::NotificationDAO() : dbConnection{DatabaseConnection::getInstanc
 }
 void NotificationDAO::addNewNotification(std::string notificationMessage)
 {
+    std::cout<<"Adding notification: "<<notificationMessage<<std::endl;
     std::string query = "CALL AddNotificationAndUpdateSeenStatus('" + notificationMessage + "')";
     if (mysql_query(connection, query.c_str()))
     {
@@ -43,9 +44,9 @@ std::vector<std::string> NotificationDAO::getUserNotifcations(std::string userId
     while ((row = mysql_fetch_row(result)))
     {
         notifications.push_back(row[1]);
-        notifications.push_back(row[2]);
     }
     mysql_free_result(result);
+    setSeenStatus(userId);
     return notifications;
 }
 void NotificationDAO::setSeenStatus(std::string userId)

@@ -113,16 +113,18 @@ std::vector<ItemReview> Helper::deserializeItemReview(const std::string &seriali
         std::istringstream itemStream(itemData);
         std::string segment;
         int segmentCount = 0;
-
+        
         while (std::getline(itemStream, segment, ','))
         { // Split by ',' delimiter
             switch (segmentCount)
             {
             case 0:
                 itemReview.itemName = segment;
+                segmentCount++;
                 break;
             case 1:
                 itemReview.averageRating = std::stod(segment);
+                segmentCount++;
                 break;
             case 2:
                 std::istringstream sentimentsStream(segment);
@@ -133,7 +135,7 @@ std::vector<ItemReview> Helper::deserializeItemReview(const std::string &seriali
                 }
                 break;
             }
-            segmentCount++;
+          
         }
 
         itemReviews.push_back(itemReview);

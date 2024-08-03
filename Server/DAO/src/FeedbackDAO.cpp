@@ -30,7 +30,7 @@ std::pair<std::string, std::vector<Feedback>> FeedbackDAO::getItemFeedback(const
 
 void FeedbackDAO::addItemFeedback(std::string userId, std::string itemName, std::string rating, std::string comment)
 {
-    std::string query = "INSERT INTO Feedback (feedbackId, userId,itemName,rating,comment) VALUES ('" + userId + "','" + itemName + "','" + rating + "','" + comment + "')";
+    std::string query = "INSERT INTO Feedback (userId,itemName,rating,comment) VALUES ('" + userId + "','" + itemName + "','" + rating + "','" + comment + "')";
     if (mysql_query(connection, query.c_str()))
     {
         std::cerr << "Query failed: " << mysql_error(connection) << std::endl;

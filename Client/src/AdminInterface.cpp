@@ -25,6 +25,7 @@ void AdminInterface::showUserMenuPrompt()
                   << std::endl;
         int adminChoice;
         std::cin >> adminChoice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         switch (adminChoice)
         {
         case 1:
@@ -45,6 +46,7 @@ void AdminInterface::showUserMenuPrompt()
             break;
         default:
             std::cout << "Invalid Choice" << std::endl;
+            flag = false;
             break;
         }
     }
@@ -70,10 +72,9 @@ void AdminInterface::showAddItemPrompt()
     std::cout << "Is it a sweet dish? " << std::endl;
     std::getline(std::cin >> std::ws, itemData.sweet);
     std::string userInput = std::to_string(Operation::addMenuItem) + "$" + itemData.serialize();
-    std::cout << "userInput " << userInput << std::endl;
     client->sendMessage(userInput);
     std::string serverResponse = client->receiveMessage();
-    if (serverResponse == "Item added successfully")
+    if (serverResponse == "item added successfully")
     {
         std::cout << "Item added successfully" << std::endl;
     }
@@ -88,12 +89,12 @@ void AdminInterface::showUpdateMenuPrompt()
 
     std::string itemToUpdate;
     std::cout << "Name the item you like to update" << std::endl;
-    std::cin >> itemToUpdate;
+    std::getline(std::cin >> std::ws, itemToUpdate);
     std::string updatedData = getDataToUpdate(itemToUpdate);
     std::string userInput = std::to_string(Operation::updateMenuItem) + "$" + updatedData;
     client->sendMessage(userInput);
     std::string serverResponse = client->receiveMessage();
-    if (serverResponse == "Item updated successfully")
+    if (serverResponse == "item updated successfully")
     {
         std::cout << "Item updated successfully" << std::endl;
     }
@@ -166,7 +167,7 @@ void AdminInterface::showDeleteItemPrompt()
 {
     std::string itemName;
     std::cout << "Enter the name of item to delete:- " << std::endl;
-    std::cin >> itemName;
+    std::getline(std::cin >> std::ws, itemName);
     std::string userInput = std::to_string(Operation::deleteMenuItem) + "$" + itemName;
     client->sendMessage(userInput);
     std::string serverResponse = client->receiveMessage();

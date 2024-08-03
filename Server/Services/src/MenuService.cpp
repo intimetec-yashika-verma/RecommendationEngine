@@ -43,7 +43,7 @@ bool MenuService::updateItem(std::string userId, std::string name, std::string p
     }
     if (sweet != "0")
     {
-        menuDAO->updateMenuItem(userId, name, "sweet", sweet);
+        menuDAO->updateMenuItem(userId, name, "isSweet", sweet);
     }
     notificationService->sendNewNotification(userId,"Item updated in the menu :" + name);
     userActivityService->saveUserActivity(userId,"Updated item :" + name);

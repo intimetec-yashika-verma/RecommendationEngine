@@ -6,9 +6,7 @@ void signalHandlerWrapper(int signal)
 {
     if (serverInstance)
     {
-        std::cout << "Signal " << signal << " received. Shutting down the server..." << std::endl;
         serverInstance->stop();
-        std::cout << "Server stopped." << std::endl;
     }
     exit(signal);
 }
